@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.23)  30 JUN 2025 12:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.23)  30 JUN 2025 22:05
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1066,16 +1066,11 @@ ocal/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc}
 ]) (./motiv.tex)
 (./design.tex
 
-<fig/HeapResizer.pdf, id=66, 365.78407pt x 225.42941pt>
+<fig/HeapResizer.pdf, id=66, 345.43011pt x 242.38269pt>
 File: fig/HeapResizer.pdf Graphic file (type pdf)
 <use fig/HeapResizer.pdf>
 Package pdftex.def Info: fig/HeapResizer.pdf  used on input line 16.
-(pdftex.def)             Requested size: 265.12389pt x 163.39256pt.
-
-Overfull \hbox (24.1035pt too wide) in paragraph at lines 16--17
- [][] 
- []
-
+(pdftex.def)             Requested size: 241.02039pt x 169.12305pt.
 
 
 
@@ -1095,14 +1090,14 @@ File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 <fig/intervals.pdf, id=71, 556.56174pt x 334.3464pt>
 File: fig/intervals.pdf Graphic file (type pdf)
 <use fig/intervals.pdf>
-Package pdftex.def Info: fig/intervals.pdf  used on input line 48.
+Package pdftex.def Info: fig/intervals.pdf  used on input line 49.
 (pdftex.def)             Requested size: 505.89pt x 303.91898pt.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 57.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 58.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 57.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 58.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 57.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 58.
 
 
 
@@ -1110,16 +1105,28 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.63 \end{equation}
-                    [3 <./fig/HeapResizer.pdf>]
+l.62 \begin{equation}
+                      [3 <./fig/HeapResizer.pdf>]
 
-<fig/FSM.pdf, id=91, 301.97679pt x 316.31285pt>
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
+een already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.79 \textbf{2. State: S WAIT SHRINK.}
+                                       [4 <./fig/intervals.pdf>]
+<fig/FSM.pdf, id=106, 301.97679pt x 316.31285pt>
 File: fig/FSM.pdf Graphic file (type pdf)
 <use fig/FSM.pdf>
-Package pdftex.def Info: fig/FSM.pdf  used on input line 99.
+Package pdftex.def Info: fig/FSM.pdf  used on input line 89.
 (pdftex.def)             Requested size: 265.12389pt x 277.71423pt.
 
-Overfull \hbox (24.1035pt too wide) in paragraph at lines 99--100
+Overfull \hbox (24.1035pt too wide) in paragraph at lines 89--90
  [][] 
  []
 
@@ -1128,82 +1135,63 @@ Overfull \hbox (24.1035pt too wide) in paragraph at lines 99--100
 LaTeX Warning: Citation `smith2020example' on page  undefined on input line 2.
 
 ) (./ack.tex) (./paper.bbl
+Underfull \vbox (badness 6808) has occurred while \output is active []
+
+
+
+
 
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.9 
-     [4 <./fig/intervals.pdf>]
+l.34 
+      [5 <./fig/FSM.pdf>])
 
-)
 
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
-[leftcolumn badness]: 1000000 on 56.30066pt
-[rightcolumn badness]: 1000000 on 56.30066pt
+
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
+[leftcolumn badness]: 1000000 on 0.11993pt
+[rightcolumn badness]: 1000000 on 0.11993pt
 - LAST -
-Extra skip:54.06421pt
-Left:364.06421pt/2.16492pt
-Right:310.0pt/2.16492pt
-Split: 361.0321pt
-Output:361.0321pt
-Pageshrink: 5.0pt
-Pagestretch: 3.0pt
+Extra skip:0.0pt
+Left:22.0pt/2.16492pt
+Right:0.0pt/0.0pt
+Split: 22.0pt
+Output:22.0pt
+Pageshrink: 0.0pt
+Pagestretch: 0.0pt
 @colht:650.43pt
-FLUSHEND [output]: 361.0321pt
-FLUSHEND [leftcolumn badness]: 43
-FUSHEND [rightcolumn badness]: 7685
+FLUSHEND [output]: 22.0pt
+FLUSHEND [leftcolumn badness]: 0
+FUSHEND [rightcolumn badness]: 0
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.116 \end{document}
-                     [5 <./fig/FSM.pdf>] (./paper.aux)
+                     [6] (./paper.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -1220,21 +1208,21 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
 ### simple group (level 1) entered at line 99 ({)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 26778 strings out of 473190
- 497633 string characters out of 5715800
- 933109 words of memory out of 5000000
+ 26793 strings out of 473190
+ 497756 string characters out of 5715800
+ 934109 words of memory out of 5000000
  49274 multiletter control sequences out of 15000+600000
- 610531 words of font info for 236 fonts, out of 8000000 for 9000
+ 611178 words of font info for 246 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,9n,131p,1523b,716s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,9n,131p,1523b,715s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.
 pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/
 local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (5 pages, 160436 bytes).
+Output written on paper.pdf (6 pages, 168835 bytes).
 PDF statistics:
- 147 PDF objects out of 1000 (max. 8388607)
- 121 compressed objects within 2 object streams
+ 151 PDF objects out of 1000 (max. 8388607)
+ 123 compressed objects within 2 object streams
  24 named destinations out of 1000 (max. 500000)
  64628 words of extra memory for PDF output out of 74296 (max. 10000000)
 
