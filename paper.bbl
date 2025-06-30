@@ -1,0 +1,35 @@
+\begin{thebibliography}{1}
+
+\bibitem{Detlefs2004GarbageFirst}
+David Detlefs, Christine Flood, Steve Heller, and Tony Printezis.
+\newblock Garbage-first garbage collection.
+\newblock In {\em Proceedings of the 4th International Symposium on Memory
+  Management (ISMM)}, pages 37--48, Vancouver, British Columbia, Canada, 2004.
+  ACM, ACM.
+
+\bibitem{TeraHeap}
+Iacovos~G. Kolokasis, Giannos Evdorou, Shoaib Akram, Christos Kozanitis,
+  Anastasios Papagiannis, Foivos~S. Zakkak, Polyvios Pratikakis, and Angelos
+  Bilas.
+\newblock {TeraHeap: Reducing Memory Pressure in Managed Big Data Frameworks}.
+\newblock In {\em Proceedings of the 28th ACM International Conference on
+  Architectural Support for Programming Languages and Operating Systems
+  (ASPLOS)}, volume~3 of {\em ASPLOS '23}, pages 694--709, New York, NY, USA,
+  2023. Association for Computing Machinery.
+
+\bibitem{DAOS}
+SeongJae Park, Madhuparna Bhowmik, and Alexandru Uta.
+\newblock {DAOS}: Data access-aware operating system.
+\newblock In {\em Proceedings of the 31st International Symposium on
+  High-Performance Parallel and Distributed Computing (HPDC '22)}, pages 4--15,
+  New York, NY, USA, 2022. Association for Computing Machinery.
+
+\bibitem{Borg}
+Muhammad Tirmazi, Adam Barker, Nan Deng, Md~E. Haque, Zhijing~Gene Qin, Steven
+  Hand, Mor Harchol-Balter, and John Wilkes.
+\newblock Borg: The next generation.
+\newblock In {\em Proceedings of the Fifteenth European Conference on Computer
+  Systems (EuroSys '20)}, New York, NY, USA, 2020. Association for Computing
+  Machinery.
+
+\end{thebibliography}

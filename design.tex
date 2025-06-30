@@ -1,0 +1,103 @@
+\section{Design}
+\subsection{Overview}
+The goal of our dynamic heap resizer is to adjust the size of the primary managed heap (H1) at runtime, based on the total GC time compared to the I/O, aiming to improve performance within a fixed DRAM budget. In our setup, the JVM uses TeraHeap, where H1 resides in DRAM and H2 is memory-mapped to an NVMe SSD, with the Linux page cache serving as the cache for H2. Unlike static DRAM division, this approach dynamically changes the size of H1 without requiring any modifications to the application itself.
+
+Operations within H1 are mainly impacted by garbage collection (GC) overhead, as increasing H1 provides more space for new objects, reducing memory pressure and thus the frequency and cost of GC cycles. However, allocating more DRAM to H1 also reduces the memory available for the page cache of H2, potentially increasing I/O cost due to more frequent and expensive page faults when accessing SSD-resident data.
+
+To balance these trade-offs, the dynamic resizer collects GC and I/O metrics at regular sampling intervals. GC costs are estimated using a model that distributes upcoming major GC pause times across future intervals, while I/O costs are directly measured based on page fault activity. Using these insights, the system determines how to partition DRAM between H1 and the page cache for H2 by deciding whether to grow or shrink H1. When H1 is shrunk, the freed physical memory is reclaimed by the operating system and becomes available for the H2 page cache.
+
+Because resizing decisions do not have immediate effects – for example, growing H1 reclaims pages from the H2 page cache only when the JVM accesses them, and shrinking H1 frees memory for H2 cache only after page faults trigger it – the Dynamic Heap Resizer incorporates a finite state machine (FSM) to manage adaptation safely. This FSM introduces wait states after each resizing action, allowing the system to observe the impact before making further changes, and includes direct state transitions to improve responsiveness and avoid delays. Figure \ref{fig:dynamic_heap_resizer} illustrates the architecture and workflow of the Dynamic Heap Resizer within our setup.
+
+
+Overall, by dynamically adapting the size of H1 at runtime, our system enables TeraHeap to maintain low GC overheads during memory-intensive phases while ensuring sufficient DRAM page cache capacity for I/O-heavy phases, leading to improved performance without modifying application logic or the underlying hybrid heap architecture.
+
+\begin{figure}[htbp]
+  \centering
+\includegraphics[width=1.1\columnwidth]{fig/HeapResizer.pdf}
+  \caption{Overview of the Dynamic Heap Resizer architecture and workflow.}
+  \label{fig:dynamic_heap_resizer}
+\end{figure}
+
+\subsection{GC overheads}
+The Dynamic Heap Resizer operates by continuously comparing garbage collection (GC) costs and I/O costs to determine how to partition DRAM between the primary managed heap (H1) and the page cache used for the secondary heap (H2). By dynamically resizing H1 at runtime, the system seeks to minimize overall application stall time. To understand this trade-off, we analyze the two key overhead components:
+\begin{itemize}
+\item \textbf{Stop-The-World (STW) Pauses:}
+STW pauses occur when the garbage collector halts all mutator threads to perform marking, evacuation, or compaction tasks. In G1GC, these pauses are triggered by allocation failures or periodic collection cycles. Longer STW pauses directly impact tail latency and user-facing performance, especially for latency-sensitive workloads like Lucene queries.
+
+\item \textbf{Concurrent GC Threads:}
+G1GC employs multiple concurrent GC threads to perform background tasks such as concurrent marking, remembered set rebuilding, and cleanup phases. Although concurrent threads reduce the reliance on long STW pauses, they consume CPU resources that would otherwise be available for application threads. Excessive concurrent GC thread utilization can lead to CPU contention, reducing effective throughput.
+
+\item \textbf{Refinement Threads:}
+Refinement threads in G1 process write barriers and maintain the remembered sets required for incremental collection. These threads process card table updates asynchronously to reduce mutator overheads. However, high allocation or mutation rates (e.g. frequent index updates in Lucene) can overload refinement threads, leading to increased CPU utilization or buffer overflow stalls if write barrier queues become saturated.
+\end{itemize}
+
+Overall, GC overheads manifest as a combination of direct latency (pause times) and indirect CPU overhead (concurrent and refinement thread activity), both of which reduce application performance.
+
+\subsection{I/O Costs}
+The dynamic heap resizer evaluates I/O costs within sampling intervals between GC cycles. Minor GC cycles occur frequently in memory-intensive applications such as Lucene, making them natural boundaries for performance assessment.
+
+To measure I/O cost accurately, we deploy an eBPF hook inside the Linux kernel that records the CPU iowait time by each mutator thread individually. This approach enables us to precisely measure each thread's non-GC/application work. At the end of each sampling interval, these exclusive per-thread iowait measurements are aggregated to calculate the total I/O cost for that interval.
+
+While it is also possible to count major page faults directly, such counts fail to represent true I/O overhead because page fault durations vary significantly, depending on SSD latency, queue depth, and caching state. In contrast, time-based per-thread iowait captures the direct impact of storage delays on application progress.
+
+This unified and precise I/O cost metric is used alongside GC cost estimates to inform resizing decisions, enabling the system to balance H1 heap size against page cache capacity effectively, thereby minimizing overall stall time experienced by mutator threads.
+
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{fig/intervals.pdf}
+  \caption{Interval variations for calculating GC cost.}
+  \label{fig:intervals}
+\end{figure*}
+
+\subsection{Interval variations to calculate GC time}
+Figure~\ref{fig:intervals} presents three interval patterns observed in G1GC, presenting how its design combines concurrent phases with stop-the-world pauses to manage memory efficiently \cite{Detlefs2004GarbageFirst}. These patterns highlight the interplay between mutator threads, concurrent GC threads, and refinement threads during different phases of garbage collection, each exhibiting distinct GC cost characteristics relevant to the dynamic heap resizer.
+
+\textbf{(a) Simple GC Interval.} In this pattern, the entire GC time consists solely of a stop-the-world (STW) pause. This occurs when the GC cycle completes within the STW phase without involving any concurrent GC threads. Thus, GC overhead here equals the STW pause duration. 
+\begin{equation}
+GC_{\text{time}} = STW_{\text{pause}}
+\end{equation}
+\textbf{(b) Normal Concurrent Mark Cycle.} This interval includes both an STW pause and a concurrent marking phase (CMC). During the concurrent mark, concurrent GC threads traverse the object graph while mutator threads continue executing, while refinement threads process remembered set updates. The interval ends with the STW Remark and Cleanup phases. Therefore, total GC time here is the sum of the concurrent mark duration and the final STW pause.
+\begin{equation}
+GC_{\text{time}} = CMC + STW_{\text{pause}}
+\end{equation}
+\textbf{(c) Interrupted Concurrent Mark Cycle.} In this more complex pattern, GC time spans an initial concurrent marking phase (CMC1), followed by an STW pause that interrupts it, and then resumes with a second concurrent marking phase (CMC2). This scenario occurs when an additional GC trigger happens during an ongoing mark cycle, forcing a STW pause. As a result, GC time here is the cumulative duration of CMC1, the STW pause, and CMC2.
+\begin{equation}
+  GC_{\text{time}} = CMC_{\text{1}} + STW_{\text{pause}} + CMC_{\text{2}}
+\end{equation}
+
+These interval variations illustrate different GC scenarios that are compared against I/O costs, enabling the FSM to make informed decisions about resizing the heap accordingly.
+
+\subsection{Decision Making via FSM}
+
+The dynamic heap resizer implements a Finite State Machine (FSM) with three core states to make runtime decisions about growing or shrinking the primary heap (H1). Each state evaluates current GC and I/O metrics to determine the next resizing action, ensuring responsiveness to application memory and I/O demands.
+
+\textbf{1. State: S WAIT GROW.} \
+% This state is entered after a grow action has been issued. The FSM checks whether the combined GC and I/O delay has decreased compared to the previous interval (\texttt{delay before action}). If the delay has not improved, the system concludes that growing H1 did not reduce overhead, and thus transitions to \textbf{S NO ACTION} while issuing a shrink action to reclaim memory for the page cache, transitioning to the \textbf{S WAIT SHRINK} state.
+% If the delay has decreased, the FSM further checks the heap occupancy. If heap utilization exceeds 70\% and H1 has not reached its maximum allowed size, another grow action is issued, remaining in \textbf{S WAIT GROW}. Otherwise, if occupancy is low, the state remains in \textbf{S WAIT GROW} with a wait action, effectively pausing further resizing until the next evaluation interval.
+
+\textbf{2. State: S WAIT SHRINK.} \
+% This state follows a shrink action. Similar to the grow state, it checks whether the GC + I/O delay has decreased. If not, it transitions to \textbf{S NO ACTION} while issuing a grow action to reallocate memory back to H1. Otherwise, it calculates current DRAM usage (RSS) plus page cache size to check for I/O slack (i.e. whether DRAM usage is below 80\% of the total DRAM limit).
+
+
+\textbf{3. State: S NOACTION.} \
+% This is the default stabilizing state when no resizing action is immediately required. In this state, the FSM compares the current delay with the previous. If the delay has decreased, it remains in \textbf{S NO ACTION} with no resizing. Otherwise, it determines the next resizing action based on the last issued action. If the last action was a shrink and H1 has not reached its maximum capacity, it transitions to \textbf{S WAIT GROW} with a grow action to increase heap size. If the last action was a grow, it transitions to \textbf{S WAIT SHRINK} with a shrink action to reclaim DRAM for the page cache.
+
+\vspace{0.2cm}
+
+\noindent Overall, this FSM design enables the dynamic heap resizer to:
+\begin{itemize}
+\item Adapt heap size based on observed performance effects.
+\item Prevent continuous grow or shrink oscillations through wait states.
+\item Respond efficiently to changing application memory pressure and I/O demands.
+\end{itemize}
+
+The clear separation of states ensures safe adaptation without introducing instability into the heap management policy, maintaining a balance between GC overhead reduction and sufficient DRAM availability for page caching.
+
+\begin{figure}[htbp]
+  \centering
+\includegraphics[width=1.1\columnwidth]{fig/FSM.pdf}
+  \caption{FSM for heap resizing decisions}
+  \label{fig:fsm}
+\end{figure}
+
