@@ -47,4 +47,141 @@
   abstract  = {Garbage-First is a server-style garbage collector, targeted for multi-processors with large memories, that meets a soft real-time goal with high probability, while achieving high throughput. Whole-heap operations, such as global marking, are performed concurrently with mutation, to prevent interruptions proportional to heap or live-data size. Concurrent marking both provides collection completeness and identifies regions ripe for reclamation via compacting evacuation. This evacuation is performed in parallel on multiprocessors, to increase throughput.},
   keywords  = {garbage collection, garbage-first, concurrent garbage collection, parallel garbage collection, soft real-time}
 }
+@inproceedings{semeru,
+  author = {Chenxi Wang and Haoran Ma and Shi Liu and Yuanqi Li and Zhenyuan Ruan and Khanh Nguyen and Michael D. Bond and Ravi Netravali and Miryung Kim and Guoqing Harry Xu},
+  title = {Semeru: A Memory-Disaggregated Managed Runtime},
+  booktitle = {14th USENIX Symposium on Operating Systems Design and Implementation (OSDI '20)},
+  year = {2020},
+  pages = {261--280},
+  publisher = {USENIX Association}
+}
+
+@inproceedings{memliner,
+  author = {Chenxi Wang and Haoran Ma and Shi Liu and Yifan Qiao and Jonathan Eyolfson and Christian Navasca and Shan Lu and Guoqing Harry Xu},
+  title = {MemLiner: Lining up Tracing and Application for a Far-Memory-Friendly Runtime},
+  booktitle = {16th USENIX Symposium on Operating Systems Design and Implementation (OSDI '22)},
+  year = {2022},
+  pages = {35--53},
+  publisher = {USENIX Association}
+}
+
+@inproceedings{mako,
+  author = {Haoran Ma and Shi Liu and Chenxi Wang and Yifan Qiao and Michael D. Bond and Stephen M. Blackburn and Miryung Kim and Guoqing Harry Xu},
+  title = {Mako: A Low-Pause, High-Throughput Evacuating Collector for Memory-Disaggregated Datacenters},
+  booktitle = {Proceedings of the 43rd ACM SIGPLAN International Conference on Programming Language Design and Implementation (PLDI '22)},
+  year = {2022},
+  pages = {92--107},
+  publisher = {ACM}
+}
+
+@inproceedings{friendlynvmgc,
+  author = {Yanfei Yang and Mingyu Wu and Haibo Chen and Binyu Zang},
+  title = {Bridging the Performance Gap for Copy-Based Garbage Collectors atop Non-Volatile Memory},
+  booktitle = {Sixteenth European Conference on Computer Systems (EuroSys '21)},
+  year = {2021},
+  pages = {343--358},
+  publisher = {ACM}
+}
+
+@inproceedings{crystalgazer1,
+  author = {Shoaib Akram and Jennifer Sartor and Kathryn McKinley and Lieven Eeckhout},
+  title = {Crystal Gazer: Profile-Driven Write-Rationing Garbage Collection for Hybrid Memories},
+  booktitle = {Proceedings of the ACM Measurement and Analysis of Computing Systems},
+  year = {2019},
+  volume = {3},
+  number = {1},
+  pages = {1--29},
+  publisher = {ACM}
+}
+
+@inproceedings{crystalgazer2,
+  author = {Shoaib Akram and Jennifer B. Sartor and Kathryn S. McKinley and Lieven Eeckhout},
+  title = {Write-Rationing Garbage Collection for Hybrid Memories},
+  booktitle = {Proceedings of the 39th ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI '18)},
+  year = {2018},
+  pages = {62--77},
+  publisher = {ACM}
+}
+
+@inproceedings{gcmove,
+  author = {Zhe Li and Mingyu Wu},
+  title = {Transparent and Lightweight Object Placement for Managed Workloads atop Hybrid Memories},
+  booktitle = {18th ACM SIGPLAN/SIGOPS International Conference on Virtual Execution Environments (VEE '22)},
+  year = {2022},
+  pages = {72--80},
+  publisher = {ACM}
+}
+
+@inproceedings{thingc,
+  author = {Albert Mingkun Yang and Erik Österlund and Jesper Wilhelmsson and Hanna Nyblom and Tobias Wrigstad},
+  title = {ThinGC: Complete Isolation with Marginal Overhead},
+  booktitle = {Proceedings of the 2020 ACM SIGPLAN International Symposium on Memory Management (ISMM '20)},
+  year = {2020},
+  pages = {74--86},
+  publisher = {ACM}
+}
+
+@inproceedings{jpdheap,
+  author = {Litong You and Tianxiao Gu and Shengan Zheng and Jianmei Guo and Sanhong Li and Yuting Chen and Linpeng Huang},
+  title = {JPDHeap: A JVM Heap Design for PM-DRAM Memories},
+  booktitle = {58th ACM/IEEE Design Automation Conference (DAC '21)},
+  year = {2021},
+  pages = {31--36},
+  publisher = {IEEE}
+}
+
+@inproceedings{melt,
+  author = {Michael D. Bond and Kathryn S. McKinley},
+  title = {Tolerating Memory Leaks},
+  booktitle = {Proceedings of the 23rd ACM SIGPLAN Conference on Object-Oriented Programming Systems Languages and Applications (OOPSLA '08)},
+  year = {2008},
+  pages = {109--126},
+  publisher = {ACM}
+}
+
+@inproceedings{leaksurvivor,
+  author = {Yan Tang and Qi Gao and Feng Qin},
+  title = {LeakSurvivor: Towards Safely Tolerating Memory Leaks for Garbage-Collected Languages},
+  booktitle = {2008 USENIX Annual Technical Conference (USENIX ATC '08)},
+  year = {2008},
+  pages = {307--320},
+  publisher = {USENIX Association}
+}
+
+@article{brecht,
+  author = {Tim Brecht and Eshrat Arjomandi and Chang Li and Hang Pham},
+  title = {Controlling Garbage Collection and Heap Growth to Reduce the Execution Time of Java Applications},
+  journal = {ACM Transactions on Programming Languages and Systems},
+  year = {2006},
+  volume = {28},
+  number = {5},
+  pages = {908--941}
+}
+
+@inproceedings{yang,
+  author = {Ting Yang and Matthew Hertz and Emery D. Berger and Scott F. Kaplan and J. Eliot B. Moss},
+  title = {Automatic Heap Sizing: Taking Real Memory into Account},
+  booktitle = {Proceedings of the 4th International Symposium on Memory Management (ISMM '04)},
+  year = {2004},
+  pages = {61--72},
+  publisher = {ACM}
+}
+
+@inproceedings{elasticmem,
+  author = {Jingjing Wang and Magdalena Balazinska},
+  title = {Elastic Memory Management for Cloud Data Analytics},
+  booktitle = {2017 USENIX Annual Technical Conference (USENIX ATC '17)},
+  year = {2017},
+  pages = {745--758},
+  publisher = {USENIX Association}
+}
+
+@inproceedings{white,
+  author = {David R. White and Jeremy Singer and Jonathan M. Aitken and Richard E. Jones},
+  title = {Control Theory for Principled Heap Sizing},
+  booktitle = {Proceedings of the 2013 International Symposium on Memory Management (ISMM '13)},
+  year = {2013},
+  pages = {27--38},
+  publisher = {ACM}
+}
 

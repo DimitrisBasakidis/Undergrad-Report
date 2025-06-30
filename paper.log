@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.23)  30 JUN 2025 22:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.23)  1 JUL 2025 00:02
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1120,7 +1120,7 @@ een already used, duplicate ignored
                    \relax 
 l.79 \textbf{2. State: S WAIT SHRINK.}
                                        [4 <./fig/intervals.pdf>]
-<fig/FSM.pdf, id=106, 301.97679pt x 316.31285pt>
+<fig/FSM.pdf, id=108, 301.97679pt x 316.31285pt>
 File: fig/FSM.pdf Graphic file (type pdf)
 <use fig/FSM.pdf>
 Package pdftex.def Info: fig/FSM.pdf  used on input line 89.
@@ -1130,14 +1130,10 @@ Overfull \hbox (24.1035pt too wide) in paragraph at lines 89--90
  [][] 
  []
 
-) (./eval.tex) (./related.tex) (./conclusions.tex
-
-LaTeX Warning: Citation `smith2020example' on page  undefined on input line 2.
-
-) (./ack.tex) (./paper.bbl
-Underfull \vbox (badness 6808) has occurred while \output is active []
+) (./eval.tex) (./related.tex
 
 
+Underfull \vbox (badness 1033) has occurred while \output is active []
 
 
 
@@ -1146,52 +1142,61 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.34 
-      [5 <./fig/FSM.pdf>])
+l.9 
+     [5 <./fig/FSM.pdf>]) (./conclusions.tex
+
+LaTeX Warning: Citation `smith2020example' on page  undefined on input line 2.
+
+) (./ack.tex) (./paper.bbl
+
+
+Underfull \hbox (badness 2856) in paragraph at lines 55--62
+[]\T1/ptm/m/n/10 (+20) Haoran Ma, Shi Liu, Chenxi Wang, Yi-fan Qiao,
+ []
+
+
+Underfull \hbox (badness 2762) in paragraph at lines 55--62
+\T1/ptm/m/n/10 (+20) Kim, and Guo-qing Harry Xu.  Mako: A low-
+ []
 
 
 
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
-[leftcolumn badness]: 1000000 on 0.11993pt
-[rightcolumn badness]: 1000000 on 0.11993pt
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
+een already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.91 
+      [6]
+Underfull \hbox (badness 2856) in paragraph at lines 93--99
+[]\T1/ptm/m/n/10 (+20) Chenxi Wang, Hao-ran Ma, Shi Liu, Yi-fan Qiao,
+ []
+
+)
+
+
+
+[leftcolumn badness]: 1000000 on 32.0pt
+[rightcolumn badness]: 1000000 on 32.0pt
 - LAST -
-Extra skip:0.0pt
-Left:22.0pt/2.16492pt
-Right:0.0pt/0.0pt
-Split: 22.0pt
-Output:22.0pt
+Extra skip:23.28003pt
+Left:298.0pt/1.44495pt
+Right:274.0pt/2.16492pt
+Split: 292.0pt
+Output:292.0pt
 Pageshrink: 0.0pt
 Pagestretch: 0.0pt
 @colht:650.43pt
-FLUSHEND [output]: 22.0pt
-FLUSHEND [leftcolumn badness]: 0
-FUSHEND [rightcolumn badness]: 0
+FLUSHEND [output]: 292.0pt
+FLUSHEND [leftcolumn badness]: 100
+FUSHEND [rightcolumn badness]: 336
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.116 \end{document}
-                     [6] (./paper.aux)
+                     [7] (./paper.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -1208,21 +1213,21 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
 ### simple group (level 1) entered at line 99 ({)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 26793 strings out of 473190
- 497756 string characters out of 5715800
- 934109 words of memory out of 5000000
- 49274 multiletter control sequences out of 15000+600000
- 611178 words of font info for 246 fonts, out of 8000000 for 9000
+ 26853 strings out of 473190
+ 498374 string characters out of 5715800
+ 934563 words of memory out of 5000000
+ 49289 multiletter control sequences out of 15000+600000
+ 613333 words of font info for 266 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,9n,131p,1523b,715s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,9n,131p,1523b,711s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.
 pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/
 local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (6 pages, 168835 bytes).
+Output written on paper.pdf (7 pages, 179383 bytes).
 PDF statistics:
- 151 PDF objects out of 1000 (max. 8388607)
- 123 compressed objects within 2 object streams
- 24 named destinations out of 1000 (max. 500000)
+ 193 PDF objects out of 1000 (max. 8388607)
+ 164 compressed objects within 2 object streams
+ 39 named destinations out of 1000 (max. 500000)
  64628 words of extra memory for PDF output out of 74296 (max. 10000000)
 
