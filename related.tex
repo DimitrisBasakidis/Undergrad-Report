@@ -9,6 +9,4 @@ Hybrid heaps such as Melt \cite{melt} and LeakSurvivor \cite{leaksurvivor} place
 
 Finally, managed heap resizing techniques focus on improving GC performance by dynamically adjusting heap sizes. Brecht et al. \cite{brecht} propose aggressive heap expansion in Boehm GC to reduce execution time, while Yang et al. \cite{yang} develop an analytical model for heap resizing in multi-tenant environments. ElasticMem \cite{elasticmem} reclaims heap memory for other processes in shared clusters to increase throughput. White et al. \cite{white} use PID controllers to meet user-defined GC goals by tuning heap resize ratios. However, these approaches solely optimize GC behavior without considering I/O costs, limiting their applicability to hybrid heaps that require balanced DRAM allocation between managed memory and page cache for performance stability.
 
-In contrast to these systems, our Dynamic Heap Resizer integrates runtime GC overhead and I/O cost monitoring into a unified adaptation framework, enabling practical, efficient, and application-transparent dynamic partitioning of DRAM within hybrid managed heaps. This co-design of heap resizing with I/O awareness improves adaptability to workload changes without requiring kernel modifications or developer annotations.
-
-
+In contrast to these systems, our Dynamic Heap Resizer monitors runtime GC overhead and I/O cost, enabling dynamic partitioning of DRAM within hybrid managed heaps.
