@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.23)  1 JUL 2025 15:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.23)  1 JUL 2025 23:51
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1063,10 +1063,27 @@ Underfull \hbox (badness 1728) in paragraph at lines 2--3
 ocal/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc}
 
 
-]) (./motiv.tex)
-(./design.tex
+]) (./motiv.tex
 
-<fig/HeapResizer.pdf, id=66, 333.5431pt x 225.15306pt>
+<fig/numbers.png, id=66, 584.1825pt x 384.43625pt>
+File: fig/numbers.png Graphic file (type png)
+<use fig/numbers.png>
+Package pdftex.def Info: fig/numbers.png  used on input line 12.
+(pdftex.def)             Requested size: 241.02039pt x 158.61124pt.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 2
+1.
+(/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+)) (./design.tex
+
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
+een already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.4 
+     [2 <./fig/numbers.png>]
+<fig/HeapResizer.pdf, id=74, 333.5431pt x 225.15306pt>
 File: fig/HeapResizer.pdf Graphic file (type pdf)
 <use fig/HeapResizer.pdf>
 Package pdftex.def Info: fig/HeapResizer.pdf  used on input line 16.
@@ -1074,20 +1091,15 @@ Package pdftex.def Info: fig/HeapResizer.pdf  used on input line 16.
 
 
 
+
+
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.24 \item
-           \textbf{Stop-The-World (STW) Pauses:} [2]
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 2
-4.
-
-(/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ts1ptm.fd
-File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-)
-
-<fig/intervals.pdf, id=71, 556.56174pt x 334.3464pt>
+l.36 
+      [3 <./fig/HeapResizer.pdf>]
+<fig/intervals.pdf, id=90, 556.56174pt x 334.3464pt>
 File: fig/intervals.pdf Graphic file (type pdf)
 <use fig/intervals.pdf>
 Package pdftex.def Info: fig/intervals.pdf  used on input line 49.
@@ -1101,26 +1113,19 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
 
 
 
+
+
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.62 \begin{equation}
-                      [3 <./fig/HeapResizer.pdf>]
-
-
+l.81 
+      [4]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
-
-pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
-een already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.79 \textbf{2. State: S WAIT SHRINK.}
-                                       [4 <./fig/intervals.pdf>]
-<fig/FSM.pdf, id=108, 301.97679pt x 316.31285pt>
+<fig/FSM.pdf, id=104, 301.97679pt x 316.31285pt>
 File: fig/FSM.pdf Graphic file (type pdf)
 <use fig/FSM.pdf>
 Package pdftex.def Info: fig/FSM.pdf  used on input line 89.
@@ -1133,23 +1138,29 @@ Overfull \hbox (24.1035pt too wide) in paragraph at lines 89--90
 ) (./eval.tex) (./related.tex
 
 
-Underfull \vbox (badness 1033) has occurred while \output is active []
-
-
-
-
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.9 
-     [5 <./fig/FSM.pdf>]) (./conclusions.tex
+l.5 
+     [5 <./fig/intervals.pdf>]
+Underfull \vbox (badness 1033) has occurred while \output is active []
+
+
+
+) (./conclusions.tex
 
 LaTeX Warning: Citation `smith2020example' on page  undefined on input line 2.
 
 ) (./ack.tex) (./paper.bbl
 
 
+pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
+een already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.46 
+      [6 <./fig/FSM.pdf>]
 Underfull \hbox (badness 2856) in paragraph at lines 55--62
 []\T1/ptm/m/n/10 (+20) Haoran Ma, Shi Liu, Chenxi Wang, Yi-fan Qiao,
  []
@@ -1160,36 +1171,26 @@ Underfull \hbox (badness 2762) in paragraph at lines 55--62
  []
 
 
-
-
-pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
-een already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.91 
-      [6]
 Underfull \hbox (badness 2856) in paragraph at lines 93--99
 []\T1/ptm/m/n/10 (+20) Chenxi Wang, Hao-ran Ma, Shi Liu, Yi-fan Qiao,
  []
 
+
+
 )
 
-
-
-[leftcolumn badness]: 1000000 on 36.71997pt
-[rightcolumn badness]: 1000000 on 36.71997pt
 - LAST -
 Extra skip:0.0pt
-Left:270.0pt/2.16492pt
-Right:250.0pt/2.16492pt
-Split: 262.0pt
-Output:262.0pt
-Pageshrink: 0.0pt
-Pagestretch: 0.0pt
+Left:562.0pt/2.16492pt
+Right:546.0pt/2.16492pt
+Split: 555.0pt
+Output:555.0pt
+Pageshrink: 17.0pt
+Pagestretch: 27.0pt
 @colht:650.43pt
-FLUSHEND [output]: 262.0pt
-FLUSHEND [leftcolumn badness]: 100
-FUSHEND [rightcolumn badness]: 100
+FLUSHEND [output]: 555.0pt
+FLUSHEND [leftcolumn badness]: 20
+FUSHEND [rightcolumn badness]: 3
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
@@ -1213,21 +1214,21 @@ Package rerunfilecheck Info: File `paper.out' has not changed.
 ### simple group (level 1) entered at line 99 ({)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 26853 strings out of 473190
- 498374 string characters out of 5715800
- 934566 words of memory out of 5000000
- 49289 multiletter control sequences out of 15000+600000
+ 26862 strings out of 473190
+ 498554 string characters out of 5715800
+ 938641 words of memory out of 5000000
+ 49297 multiletter control sequences out of 15000+600000
  613333 words of font info for 266 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,9n,131p,1523b,711s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,9n,131p,1523b,716s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.
 pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/
 local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (7 pages, 179104 bytes).
+Output written on paper.pdf (7 pages, 310846 bytes).
 PDF statistics:
- 193 PDF objects out of 1000 (max. 8388607)
- 164 compressed objects within 2 object streams
- 39 named destinations out of 1000 (max. 500000)
- 64628 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 198 PDF objects out of 1000 (max. 8388607)
+ 167 compressed objects within 2 object streams
+ 40 named destinations out of 1000 (max. 500000)
+ 64633 words of extra memory for PDF output out of 74296 (max. 10000000)
 
