@@ -3,48 +3,46 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: paper.aux
 The style file: plain.bst
 Database file #1: paper.bib
-Warning--I didn't find a database entry for "lucene"
-Warning--I didn't find a database entry for "smith2020example"
 Warning--can't use both volume and number fields in crystalgazer1
-You've used 19 entries,
+You've used 20 entries,
             2118 wiz_defined-function locations,
-            615 strings with 8797 characters,
-and the built_in function-call counts, 9880 in all, are:
-= -- 1006
-> -- 532
+            621 strings with 8962 characters,
+and the built_in function-call counts, 10088 in all, are:
+= -- 1030
+> -- 539
 < -- 19
-+ -- 209
-- -- 190
-* -- 706
-:= -- 1515
-add.period$ -- 75
-call.type$ -- 19
-change.case$ -- 152
++ -- 212
+- -- 192
+* -- 714
+:= -- 1558
+add.period$ -- 79
+call.type$ -- 20
+change.case$ -- 157
 chr.to.int$ -- 0
-cite$ -- 20
-duplicate$ -- 391
-empty$ -- 710
-format.name$ -- 190
-if$ -- 2183
+cite$ -- 21
+duplicate$ -- 399
+empty$ -- 724
+format.name$ -- 192
+if$ -- 2224
 int.to.chr$ -- 0
-int.to.str$ -- 19
+int.to.str$ -- 20
 missing$ -- 19
-newline$ -- 98
-num.names$ -- 38
-pop$ -- 183
+newline$ -- 104
+num.names$ -- 40
+pop$ -- 185
 preamble$ -- 1
-purify$ -- 133
+purify$ -- 136
 quote$ -- 0
-skip$ -- 296
+skip$ -- 301
 stack$ -- 0
-substring$ -- 569
+substring$ -- 574
 swap$ -- 164
 text.length$ -- 19
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 76
+type$ -- 80
 warning$ -- 1
-while$ -- 91
-width$ -- 21
-write$ -- 235
-(There were 3 warnings)
+while$ -- 93
+width$ -- 22
+write$ -- 249
+(There was 1 warning)

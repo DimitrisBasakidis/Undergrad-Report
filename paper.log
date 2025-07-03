@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.23)  1 JUL 2025 23:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.6.23)  3 JUL 2025 11:36
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1047,10 +1047,6 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 96.
 
 (./abstract.tex) (./intro.tex
-
-LaTeX Warning: Citation `lucene' on page  undefined on input line 2.
-
-
 Underfull \hbox (badness 1728) in paragraph at lines 2--3
 \T1/ptm/m/n/10 (+20) Modern high-performance full-text search en-gines like
  []
@@ -1065,11 +1061,11 @@ ocal/texlive/2025/texmf-dist/fonts/enc/dvips/base/8r.enc}
 
 ]) (./motiv.tex
 
-<fig/numbers.png, id=66, 584.1825pt x 384.43625pt>
+<fig/numbers.png, id=72, 624.83438pt x 406.01688pt>
 File: fig/numbers.png Graphic file (type png)
 <use fig/numbers.png>
 Package pdftex.def Info: fig/numbers.png  used on input line 12.
-(pdftex.def)             Requested size: 241.02039pt x 158.61124pt.
+(pdftex.def)             Requested size: 241.02039pt x 156.61125pt.
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 2
 1.
 (/usr/local/texlive/2025/texmf-dist/tex/latex/psnfss/ts1ptm.fd
@@ -1083,7 +1079,7 @@ een already used, duplicate ignored
                    \relax 
 l.4 
      [2 <./fig/numbers.png>]
-<fig/HeapResizer.pdf, id=74, 333.5431pt x 225.15306pt>
+<fig/HeapResizer.pdf, id=80, 333.5431pt x 225.15306pt>
 File: fig/HeapResizer.pdf Graphic file (type pdf)
 <use fig/HeapResizer.pdf>
 Package pdftex.def Info: fig/HeapResizer.pdf  used on input line 16.
@@ -1099,7 +1095,7 @@ een already used, duplicate ignored
                    \relax 
 l.36 
       [3 <./fig/HeapResizer.pdf>]
-<fig/intervals.pdf, id=90, 556.56174pt x 334.3464pt>
+<fig/intervals.pdf, id=96, 556.56174pt x 334.3464pt>
 File: fig/intervals.pdf Graphic file (type pdf)
 <use fig/intervals.pdf>
 Package pdftex.def Info: fig/intervals.pdf  used on input line 49.
@@ -1125,7 +1121,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 
-<fig/FSM.pdf, id=104, 301.97679pt x 316.31285pt>
+<fig/FSM.pdf, id=110, 301.97679pt x 316.31285pt>
 File: fig/FSM.pdf Graphic file (type pdf)
 <use fig/FSM.pdf>
 Package pdftex.def Info: fig/FSM.pdf  used on input line 89.
@@ -1135,7 +1131,7 @@ Overfull \hbox (24.1035pt too wide) in paragraph at lines 89--90
  [][] 
  []
 
-) (./eval.tex) (./related.tex
+) (./methodology.tex) (./eval.tex) (./related.tex
 
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
@@ -1148,87 +1144,79 @@ Underfull \vbox (badness 1033) has occurred while \output is active []
 
 
 
-) (./conclusions.tex
-
-LaTeX Warning: Citation `smith2020example' on page  undefined on input line 2.
-
-) (./ack.tex) (./paper.bbl
+) (./conclusions.tex) (./ack.tex) (./paper.bbl
 
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.46 
+l.42 
       [6 <./fig/FSM.pdf>]
-Underfull \hbox (badness 2856) in paragraph at lines 55--62
+Underfull \hbox (badness 2856) in paragraph at lines 61--68
 []\T1/ptm/m/n/10 (+20) Haoran Ma, Shi Liu, Chenxi Wang, Yi-fan Qiao,
  []
 
 
-Underfull \hbox (badness 2762) in paragraph at lines 55--62
+Underfull \hbox (badness 2762) in paragraph at lines 61--68
 \T1/ptm/m/n/10 (+20) Kim, and Guo-qing Harry Xu.  Mako: A low-
  []
 
 
-Underfull \hbox (badness 2856) in paragraph at lines 93--99
+
+
+Underfull \hbox (badness 2856) in paragraph at lines 99--105
 []\T1/ptm/m/n/10 (+20) Chenxi Wang, Hao-ran Ma, Shi Liu, Yi-fan Qiao,
  []
-
-
 
 )
 
 - LAST -
 Extra skip:0.0pt
-Left:562.0pt/2.16492pt
-Right:546.0pt/2.16492pt
-Split: 555.0pt
-Output:555.0pt
-Pageshrink: 17.0pt
-Pagestretch: 27.0pt
+Left:574.0pt/2.16492pt
+Right:582.0pt/2.16492pt
+Split: 583.0pt
+Output:583.0pt
+Pageshrink: 19.0pt
+Pagestretch: 31.0pt
 @colht:650.43pt
-FLUSHEND [output]: 555.0pt
-FLUSHEND [leftcolumn badness]: 20
-FUSHEND [rightcolumn badness]: 3
+FLUSHEND [output]: 583.0pt
+FLUSHEND [leftcolumn badness]: 5
+FUSHEND [rightcolumn badness]: 0
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.}) has b
 een already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.116 \end{document}
+l.117 \end{document}
                      [7] (./paper.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
 Package rerunfilecheck Info: File `paper.out' has not changed.
-(rerunfilecheck)             Checksum: D26DA902E7317E33F66B31E4E9D0140E;1343.
+(rerunfilecheck)             Checksum: BC59C4D85304449C65D2B914CAED528E;1442.
  )
 (\end occurred inside a group at level 1)
 
 ### simple group (level 1) entered at line 99 ({)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 26862 strings out of 473190
- 498554 string characters out of 5715800
- 938641 words of memory out of 5000000
- 49297 multiletter control sequences out of 15000+600000
- 613333 words of font info for 266 fonts, out of 8000000 for 9000
+ 26869 strings out of 473190
+ 498718 string characters out of 5715800
+ 940680 words of memory out of 5000000
+ 49302 multiletter control sequences out of 15000+600000
+ 613206 words of font info for 264 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,9n,131p,1523b,716s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,9n,131p,1506b,720s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmr10.pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.
 pfb></usr/local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/
 local/texlive/2025/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on paper.pdf (7 pages, 310846 bytes).
+Output written on paper.pdf (7 pages, 335277 bytes).
 PDF statistics:
- 198 PDF objects out of 1000 (max. 8388607)
- 167 compressed objects within 2 object streams
- 40 named destinations out of 1000 (max. 500000)
- 64633 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 204 PDF objects out of 1000 (max. 8388607)
+ 173 compressed objects within 2 object streams
+ 42 named destinations out of 1000 (max. 500000)
+ 64641 words of extra memory for PDF output out of 74296 (max. 10000000)
 

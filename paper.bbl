@@ -34,6 +34,12 @@ David Detlefs, Christine Flood, Steve Heller, and Tony Printezis.
   Management (ISMM)}, pages 37--48, Vancouver, British Columbia, Canada, 2004.
   ACM, ACM.
 
+\bibitem{lucene_dimitris}
+Dimitrios Klinaftakis.
+\newblock Hosting large query caches over fast storage devices.
+\newblock Bachelor's thesis, University of Crete, Heraklion, Greece, 2025.
+\newblock Available from University of Crete library.
+
 \bibitem{TeraHeap}
 Iacovos~G. Kolokasis, Giannos Evdorou, Shoaib Akram, Christos Kozanitis,
   Anastasios Papagiannis, Foivos~S. Zakkak, Polyvios Pratikakis, and Angelos
