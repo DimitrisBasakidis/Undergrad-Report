@@ -1,11 +1,37 @@
 \section{Motivation}
-Lucene is a widely used text search engine library that relies on managed runtimes for indexing and querying large datasets efficiently. TeraHeap, a state-of-the-art memory system, extends the managed heap beyond DRAM by partitioning it into a primary heap (H1) in DRAM and a secondary heap (H2) mapped to a slower memory tier such as NVMe SSD. This design reduces garbage collection (GC) overhead by limiting GC operations to H1, while H2 provides additional capacity for less frequently accessed data.
+\note{jk: Give context about Lucene and page cache and then say how TeraHeap is
+used to offload cached data over the storage device. Then say that we evaluate
+how page cache and heap size accordingly affects execution.}
+Lucene is a widely used text search engine library that relies on managed
+runtimes for indexing and querying large datasets efficiently. TeraHeap, a
+state-of-the-art memory system, extends the managed heap beyond DRAM by
+partitioning it into a primary heap (H1) in DRAM and a secondary heap (H2)
+mapped to a slower memory tier such as NVMe SSD. This design reduces garbage
+collection (GC) overhead by limiting GC operations to H1, while H2 provides
+additional capacity for less frequently accessed data.
 
-However, TeraHeap statically divides DRAM between H1 and the page cache for H2 at JVM launch time, which introduces significant limitations. If H1 is too small, Lucene experiences high GC overhead due to frequent collections, impacting query and indexing latency. Conversely, if the DRAM page cache for H2 is too small, accessing index segments stored in H2 incurs high I/O latency, degrading search performance. Because Lucene workloads exhibit varying memory demands, such as bulk indexing phases which require large heaps, while read-heavy query phases benefit from a larger page cache. Moreover, a static DRAM division is not able adapt to these changes, leading to suboptimal performance.
+However, TeraHeap statically divides DRAM between H1 and the page cache for H2
+at JVM launch time, which introduces significant limitations. If H1 is too
+small, Lucene experiences high GC overhead due to frequent collections,
+impacting query and indexing latency. Conversely, if the DRAM page cache for H2
+is too small, accessing index segments stored in H2 incurs high I/O latency,
+degrading search performance. Because Lucene workloads exhibit varying memory
+demands, such as bulk indexing phases which require large heaps, while
+read-heavy query phases benefit from a larger page cache. Moreover, a static
+DRAM division is not able adapt to these changes, leading to suboptimal
+performance.
 
-These limitations motivate our approach: dynamically resizing the primary heap (H1) at runtime in TeraHeap to better match Lucene’s changing memory needs. By adjusting H1 size based on GC and I/O costs, we enable Lucene to maintain low GC overhead during indexing and benefit from a larger page cache during query processing, ultimately improving overall performance under DRAM constraints.
+These limitations motivate our approach: dynamically resizing the primary heap
+(H1) at runtime in TeraHeap to better match Lucene’s changing memory needs. By
+adjusting H1 size based on GC and I/O costs, we enable Lucene to maintain low GC
+overhead during indexing and benefit from a larger page cache during query
+processing, ultimately improving overall performance under DRAM constraints.
 
-The figure \ref{fig:graph} illustrates the breakdown of Lucene’s total execution time into GC time and non-GC (other) time under different page cache configurations. The x-axis represents the fraction of DRAM allocated to the page cache (10\%, 20\%, 30\%, 40\%, etc.), while the y-axis shows the average total execution time in seconds for each configuration.
+The figure \ref{fig:graph} illustrates the breakdown of Lucene’s total execution
+time into GC time and non-GC (other) time under different page cache
+configurations. The x-axis represents the fraction of DRAM allocated to the page
+cache (10\%, 20\%, 30\%, 40\%, etc.), while the y-axis shows the average total
+execution time in seconds for each configuration.
 
 \begin{figure}[htbp]
   \centering
