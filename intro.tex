@@ -1,72 +1,43 @@
 \section{Introduction}
 
-\note{jk: the first two paragraphs should describe the problem. 1. Applications
-need large heaps but DRAM does not scale. The second paragraph should describe
-that existing solutions like TeraHeap extend the heap over storage device but
-they have the DRAM division problem.}
+% \note{jk: the first two paragraphs should describe the problem. 1. Applications
+% need large heaps but DRAM does not scale. The second paragraph should describe
+% that existing solutions like TeraHeap extend the heap over storage device but
+% they have the DRAM division problem.}
+%
+Modern high-performance applications, such as full-text search engines like Apache Lucene 
+\cite{lucene_dimitris}, increasingly operate on large-scale datasets to deliver low-latency 
+search and analytics. Lucene relies heavily on DRAM to store its indexing structures, field 
+and query caches, and evaluation data to achieve high throughput and fast response times. 
+However, while data volumes continue to expand rapidly, DRAM capacity improvements have stagnated 
+in recent years \cite{DAOS, Borg}. This growing imbalance creates a bottleneck, as Lucene’s memory 
+requirements outpace available DRAM resources, leading to degraded performance, increased GC overheads, 
+and complex memory management challenges for developers.
 
-Modern high-performance full-text search engines like Apache Lucene
-\cite{lucene_dimitris} are increasingly used in large-scale data processing and
-indexing. Lucene, which runs on the JVM, relies on DRAM to store indexing
-structures, field and query caches, query evaluation data to deliver low-latency
-performance. However, data volumes continues to expand at a rapid rate, also
-growing memory requirements accordingly. This presents a challenge, as
-improvements in DRAM capacity have not kept up with the rate of data growth in
-recent years \cite{DAOS, Borg}. As a result, the memory footprint of Lucene
-applications often becomes a bottleneck, particularly working with large indexes
-or real-time search workloads. The JVM heap and related managed memory
-components grow more slowly than the datasets Lucene is expected to handle,
-leading to pressure on memory management and performance tuning. In our
-experiments, we use TeraHeap as the underlying managed runtime system. TeraHeap
-introduces a dual heap design that places the primary heap (H1) in DRAM and a
-secondary heap (H2) on slower, larger-capacity memory such as SSD-backed
-storage. This separation enables the system to confine garbage collection (GC)
-activity to H1, avoiding the costly scanning and compaction of objects stored in
-the slow tier (H2). TeraHeap also uses a portion of DRAM as an I/O cache to
-speed up accesses to H2, allowing frequently accessed objects to benefit from
-DRAM latency.
+To address these limitations, TeraHeap \cite{TeraHeap} introduces a dual heap design,
+allocating a primary heap (H1) for GC-managed short-lived objects and a secondary heap (H2) on 
+SSD-backed storage where longer-lived data structures such as the Lucene query cache are placed to reduce GC overhead. 
+Additionally, it uses a portion of DRAM as an I/O cache to accelerate accesses to H2 and hide storage latency. However, TeraHeap statically partitions 
+DRAM between H1 and the page cache for H2, lacking dynamic adaptability to changing application memory pressure 
+and I/O demands. This static division can lead to suboptimal performance, as the ideal DRAM allocation between GC-managed
+heap space and I/O cache varies significantly across workloads and execution phases.
 
-\note{jk: in you approach you propose a resizing policy that takes into account
-GC and I/O costs. Explain what your system does. Then in other pargraph say that
-you implement this over TeraHeap. Then, say that you evaluate Lucene and write
-some high level results.}
-In our setup, we use TeraHeap \cite{TeraHeap} as the runtime system and focus
-exclusively on varying the size of H1, the primary heap located in DRAM and
-managed by the G1 Garbage Collector. By increasing or decreasing the size of H1
-at runtime, we evaluate how memory pressure affects application performance and
-garbage collection behavior. Since DRAM is shared between H1 and the page cache
-used to accelerate H2 accesses, changing the size of H1 effectively changes the
-partitioning of DRAM between managed memory and the cache for the slow-tier heap
-(H2). This setup allows us to study the trade-off between GC-managed heap size
-and available cache capacity for H2, and its impact on overall system
-performance.
+% \note{jk: in you approach you propose a resizing policy that takes into account
+% GC and I/O costs. Explain what your system does. Then in other pargraph say that
+% you implement this over TeraHeap. Then, say that you evaluate Lucene and write
+% some high level results.}
+In this work, we propose a Dynamic Heap Resizer, a system that continuously monitors both garbage collection 
+(GC) and I/O costs to make runtime decisions on how to partition DRAM between the managed heap (H1) and the 
+page cache for the secondary heap (H2). Our approach dynamically resizes H1 by increasing or decreasing its 
+allocation based on observed GC pause times, concurrent GC CPU overhead, and I/O wait times. By doing so, it 
+balances memory allocation to minimize overall application stall time. The resizer employs a lightweight finite 
+state machine (FSM) policy that introduces wait states to observe the effects of each resizing action before taking 
+further decisions, ensuring stability while remaining responsive to rapid workload changes. We implement the Dynamic 
+Heap Resizer on top of TeraHeap, extending its hybrid heap framework with adaptive, runtime resizing capabilities without
+requiring any application modifications.
 
-In this work, we introduce a Dynamic Heap Resizer, which is a system that
-automatically decides at runtime whether to adjust the size of H1 or the H2 page
-cache. A Dynamic Heap Resizer is the first approach that enables practical and
-efficient deployment of hybrid heaps. Its design, which continuously rebalances
-DRAM allocation between H1 and the H2 cache, addresses some challenges in hybrid
-memory management.
-
-Hybrid heap systems face significant challenges in effectively dividing a fixed
-DRAM budget between H1, the GC-managed heap, and the H2 page cache, which
-accelerates access to slow-tier memory. First, static DRAM partitioning leads to
-imbalanced performance trade-offs: (1) allocating too little memory to H1
-results in high garbage collection overhead, while a small H2 cache increases
-I/O latency for accessing off-heap objects. (2) Existing approaches lack
-adaptability, as they require prior knowledge of application behavior or manual
-tuning to set optimal heap sizes. This is impractical for real-world
-applications with dynamic memory demands that change over time. (3) Even when
-DRAM allocations are adjusted, the impact of these changes is delayed due to OS
-memory reclamation and page cache resizing latencies, making current systems
-slow to react to shifting workload phases and limiting their responsiveness.
-
-With the use of a Dynamic Heap Resizer, by continuously monitoring both garbage
-collection and I/O costs, decisions are made to resize H1 or adjust the
-effective cache space for H2, optimizing performance across diverse workload
-conditions. It employs an advanced adaptation mechanism based on a finite state
-machine (FSM) with wait states and direct transitions, enabling fast and stable
-adjustments as application memory requirements evolve. This approach ensures
-that DRAM is allocated efficiently between managed heap and page cache without
-requiring application-specific knowledge or manual intervention, improving
-overall system performance and responsiveness.
+We evaluate our system on Apache Lucene, a widely used full-text search engine, under memory-constrained scenarios using 
+realistic query workloads with varied frequency and size characteristics. Our results show that the Dynamic Heap Resizer 
+outperforms both hand-tuned and even DRAM division configurations. Specifically, it maintains low GC pause times during 
+memory-intensive phases while ensuring sufficient page cache capacity for I/O-heavy phases, leading to improved end-to-end 
+execution time, reduced tail latencies, and enhanced performance stability across diverse workloads.
