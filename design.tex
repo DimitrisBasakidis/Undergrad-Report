@@ -34,7 +34,6 @@ includes direct state transitions to improve responsiveness and avoid delays.
 Figure \ref{fig:dynamic_heap_resizer} illustrates the architecture and workflow
 of the Dynamic Heap Resizer within our setup.
 
-
 Overall, by dynamically adapting the size of H1 at runtime, our system enables
 TeraHeap to maintain low GC overheads during memory-intensive phases while
 ensuring sufficient DRAM page cache capacity for I/O-heavy phases, leading to
@@ -85,7 +84,6 @@ This unified and precise I/O cost metric is used alongside GC cost estimates to
 inform resizing decisions, enabling the system to balance H1 heap size against
 page cache capacity effectively, thereby minimizing overall stall time
 experienced by mutator threads.
-
 
 \begin{figure*}[t]
   \centering
@@ -168,11 +166,10 @@ action was a heap shrink and the current heap size has not reached its
 configured maximum limit, the system transitions to S WAIT GROW and issues a
 grow action to increase H1, targeting reduced GC overhead. Conversely, if the
 last action was a grow, the FSM transitions to S WAIT SHRINK and issues a shrink
-action to reclaim DRAM for the page cache, aiming to reduce I/O costs. If
-neither condition is met, the FSM remains in S NO ACTION without issuing any
-resizing commands.
+action to reclaim DRAM for the page cache, aiming to reduce I/O costs. 
+If neither condition is met, the FSM remains in S NO ACTION without resizing.
 
-\vspace{0.2cm}
+% \vspace{0.2cm}
 
 \begin{figure}[htbp]
   \centering

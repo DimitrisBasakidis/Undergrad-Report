@@ -1,1 +1,16 @@
 \section{Conclusions}
+In modern hybrid heap setups, large-scale search engines such as 
+Lucene exhibit dynamic variations in memory requirements between 
+the DRAM-managed heap and the I/O cache. The conventional approach of statically dividing DRAM
+between these two tiers is inadequate for addressing such demands, 
+leading to performance bottlenecks. In this
+work, we propose and evaluate the Dynamic Heap Resizer, a lightweight runtime
+mechanism that continuously reallocates DRAM between the managed heap and the
+H2 page cache based on GC and I/O costs. Our evaluation on representative Lucene
+query workloads demonstrates that the Dynamic Heap Resizer adapts efficiently 
+to changing memory and I/O patterns, improving execution time by up to 15.8\% 
+compared to static 50-50 partitioning and 13.4\% compared to the ideal configurations, without requiring manual tuning. Overall, 
+dynamic memory resizing offers an effective solution to to reduce the execution time 
+of Lucene under constrained DRAM budgets.
+
+
