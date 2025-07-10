@@ -1,35 +1,27 @@
 \section{Evaluation}
 \subsection{Dynamic Heap Resizer vs Static DRAM configurations}
-First, we investigate the performance of Dynamic Heap Resizer 
-(DHR) compared to two static configurations: (1) hand-tuned 
-(ideal) and (2) even DRAM division (50-50). 
-Figure~\ref{fig:gc_exec_time} depicts the normalized 
-execution time of three representative Lucene benchmarks 
-(M1, M2, and M3) on the Titan2 server. Within each group,
-the first and second columns correspond to static ideal and 
-static 50-50 partitioning, respectively, while the third
-column represents DHR.
+First, we investigate the performance of Dynamic Heap Resizer (DHR) compared to
+two static configurations: (1) hand-tuned (ideal) and (2) even DRAM division
+(50-50). Figure~\ref{fig:gc_exec_time} depicts the normalized execution time of
+three representative Lucene benchmarks (M1, M2, and M3) on the Titan2 server.
+Within each group, the first and second columns correspond to static ideal and
+static 50-50 partitioning, respectively, while the third column represents DHR.
 
-Overall, DHR consistently outperforms both static
-configurations across all benchmarks. In particular,
-compared to the static 50-50 configuration (even), DHR
-achieves execution time reductions of 14.3\% for M1, 15.8\% 
-for M2, and 1.3\% for M3. Compared to the hand-tuned (ideal)
-configurations, DHR provides performance improvements of 
-up to 13.4\% (M2). 
-Although DHR improves overall performance, we observe an increase 
-in GC time, particularly in M1 and M2. This increase is attributed
-to high minor GC activity caused by the creation of many backward 
-pointers within these workloads. Backward pointers are references 
-from older to younger objects, which prevent objects from being 
-collected during minor GCs, resulting in higher promotion rates and
-increased GC overhead.
+Overall, DHR consistently outperforms both static configurations across all
+benchmarks. In particular, compared to the static 50-50 configuration (even),
+DHR achieves execution time reductions of 14.3\% for M1, 15.8\% for M2, and
+1.3\% for M3. Compared to the hand-tuned (ideal) configurations, DHR provides
+performance improvements of up to 13.4\% (M2). Although DHR improves overall
+performance, we observe an increase in GC time, particularly in M1 and M2. This
+increase is attributed to high minor GC activity caused by the creation of many
+backward pointers within these workloads. Backward pointers are references from
+older to younger objects, which prevent objects from being collected during
+minor GCs, resulting in higher promotion rates and increased GC overhead.
 
-Specifically, GC time nearly doubles in M1 (1.87–1.93× increase) and
-increases by approximately 19\% (1.18×) in M2 compared to static configurations. 
-In contrast, M3 exhibits a slight decrease in GC time, indicating minimal backward 
-pointer impact.
-
+Specifically, GC time nearly doubles in M1 (1.87 -- 1.93$\times$ increase) and
+increases by approximately 19\% (1.18×) in M2 compared to static configurations.
+In contrast, M3 exhibits a slight decrease in GC time, indicating minimal
+backward pointer impact.
 
 \begin{figure}[htbp]
   \centering
@@ -40,6 +32,13 @@ pointer impact.
 
 \subsection{Page Cache Usage and Device Traffic}
 
+\note{why you do not show also the heap usage?? Make 3 plots side-by-side. One
+  plot for each workload. In each plot show the usage of heap and page cache
+over time. Also it will be nice to show also the heap usage and page cache usage
+of the static configurations. So someone could see that you make decisions. Our
+goal is not to maximize only page cache. The goal is at runtime to repartition
+DRAM based on application requirements for heap and page cache... I think this
+subsection needs to be fixed.}
 In this subsection, we analyze the page cache utilization under the Dynamic Heap Resizer
 (DHR) for the three evaluated workloads: M1, M2, and M3. Figure~\ref{fig:pc_dhr} 
 illustrates the page cache usage over time demonstrates different caching behaviors, 
@@ -84,6 +83,11 @@ DHR   & 0.07 & 0.08 & 0.002 & 24.80 & 28.06 & 0.05 \\
 
 \subsection{Query Throughput (QPS) Analysis}
 
+\note{jk: Througput is part of the execution time improvement. So merge this
+with the first subsection. Do not show the graph about throughput say it only in
+words. Also, in Figure 6 in M3 the differences are not obvious. To improve the
+appearance of the plot normalize the results for each workload with the
+hand-tuned version. so the y-axis will be from 0 - 1.} 
 Figure~\ref{fig:qps_plot}: Compares Queries per second (QPS) for each benchmark (M1, M2, M3)
 under Ideal, Even, and Dynamic Heap Resizer (DHR) configurations.
 
