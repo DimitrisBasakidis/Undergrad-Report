@@ -2,19 +2,32 @@
 % \note{jk: Give context about Lucene and page cache and then say how TeraHeap is
 % used to offload cached data over the storage device. Then say that we evaluate
 % how page cache and heap size accordingly affects execution.}
-Lucene is a widely used full-text search engine library that powers indexing and querying for 
-large-scale data analytics and enterprise search applications. To deliver low-latency query responses, 
-Lucene relies heavily on managed heap memory to store its indexing structures, query evaluation data 
-and internal caches. In particular, the page cache plays a crucial role by caching index segments and 
-frequently accessed postings lists, reducing I/O latency during searches. However, as datasets grow, DRAM 
-capacity becomes insufficient to hold all required data and caches.
 
+\note{Start the section showing the purpose.. what is your purpose for the
+motivation.. what is your goal? what are you trying to show.. Then explain why
+you select Lucene as a usecase.} 
+
+\note{rewrite the motivation because it is like reading the intro again!!!
+Another option is to merge it with intro... Think about it!}
+
+Lucene is a widely used full-text search engine library that powers indexing and
+querying for large-scale data analytics and enterprise search applications. To
+deliver low-latency query responses, Lucene relies heavily on managed heap
+memory to store its indexing structures, query evaluation data and internal
+caches. In particular, the page cache plays a crucial role by caching index
+segments and frequently accessed postings lists, reducing I/O latency during
+searches. However, as datasets grow, DRAM capacity becomes insufficient to hold
+all required data and caches.
+
+\note{remove this paragraph... you write the same thing in intro... }
 To overcome these limitations, TeraHeap extends the JVM managed heap beyond DRAM capacity by partitioning 
 it into two regions: a primary heap (H1) in DRAM for GC-managed short-lived objects and a secondary heap 
 (H2) mapped to fast NVMe SSD storage for longer-lived cached data such as Lucene’s query cache. This hybrid 
 design allows TeraHeap to confine garbage collection activity to H1, avoiding expensive GC scans over large
 cached data stored in H2, while using DRAM both for heap allocations and as a page cache to accelerate H2 accesses.
 
+\note{again!! you write the same thing in intro... read the text carefully and
+remove duplicate things.}
 However, TeraHeap statically divides DRAM between H1 and the page cache for H2 at JVM launch time, introducing 
 significant performance limitations. If H1 is too small, Lucene experiences high GC overhead due to frequent collections, 
 negatively impacting indexing and query latency. Conversely, if the DRAM page cache for H2 is too small, accessing Lucene’s 
