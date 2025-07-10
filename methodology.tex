@@ -4,16 +4,44 @@ In our evaluation, we will be answering the following questions:
 \begin{itemize}
 \item How does Dynamic Heap Resizing improve performance compared to static DRAM partitioning?
 \item What is the impact of dynamic resizing on garbage collection overhead and application execution time?
-\item How robust is the Dynamic Heap Resizer under different lucene workloads?
 \end{itemize}
 
-All experiments were conducted on titan2, a dedicated server equipped with two Intel Xeon Gold 5318Y CPUs (48 physical cores, 96 hardware threads), 256 GB of DDR4 DRAM, and a 1.7 TB NVMe SSD used for the H2 file. The system runs Ubuntu 24.04.1 LTS with Linux kernel version 6.8.0-1020-nvidia. For each experiment the DRAM capacity has been limited by using cgroups.
-We evaluate our system using a 300 GB real-world Lucene dataset containing 52.6 billion words. We preprocess this dataset by performing a complete word count and filtering out stop words, single-character words, and non-English words. Based on frequency distributions, words are categorized into three groups: high-frequency (top 1\% of words, accounting for ~80\% of total occurrences), medium-frequency (mid-range words), and low-frequency (91\% of words, contributing only ~1\% of occurrences). This classification models different levels of I/O load, as high-frequency words lead to significantly higher document access rates compared to low-frequency words.
+All experiments were conducted on titan2, a dedicated server equipped with two
+Intel Xeon Gold 5318Y CPUs (48 physical cores, 96 hardware threads), 256 GB of
+DDR4 DRAM, and a 1.7 TB NVMe SSD used for the H2 file. The system runs Ubuntu
+24.04.1 LTS with Linux kernel version 6.8.0-1020-nvidia. For each experiment the
+DRAM capacity has been limited by using cgroups. We evaluate our system using a
+300 GB real-world Lucene dataset containing 52.6 billion words. We preprocess
+this dataset by performing a complete word count and filtering out stop words,
+single-character words, and non-English words. Based on frequency distributions,
+words are categorized into three groups: high-frequency (top 1\% of words,
+accounting for ~80\% of total occurrences), medium-frequency (mid-range words),
+and low-frequency (91\% of words, contributing only ~1\% of occurrences). This
+classification models different levels of I/O load, as high-frequency words lead
+to significantly higher document access rates compared to low-frequency words.
 
-We construct queries of two sizes: small queries retrieving the top 50 results and large queries retrieving up to 500,000 results. Large queries place higher pressure on the managed heap, while frequency classes primarily influence I/O cost. Our evaluation includes three workloads:
+We construct queries of two sizes: small queries retrieving the top 50 results
+and large queries retrieving up to 500,000 results. Large queries place higher
+pressure on the managed heap, while frequency classes primarily influence I/O
+cost. Our evaluation includes three workloads:
 M1, high-frequency small queries (HS)
 M2, high-frequency large queries (HL) and
-M3, a mixed workload consisting of medium-frequency small (MS) and medium-frequency large (ML) queries, reflecting realistic deployments where both I/O load and heap pressure vary dynamically.
+M3, a mixed workload consisting of medium-frequency small (MS) and
+medium-frequency large (ML) queries, reflecting realistic deployments where both
+I/O load and heap pressure vary dynamically.
 
-For baseline comparison, we evaluate three configurations. First, we run Lucene using TeraHeap with a static DRAM partition, allocating 50\% of the 40 GB DRAM budget to H1 (managed heap) and 50\% to H2 (page cache backed by NVMe storage), representing a typical balanced setup when no detailed tuning is performed. Second, we run Lucene with hand-tuned ideal configurations, where the DRAM allocation between H1 and H2 is manually optimized to minimize execution time and garbage collection overheads for each benchmark. Finally, we evaluate our Dynamic Heap Resizer, which automatically adjusts the size of H1 at runtime. This experimental setup enables us to compare the effectiveness of dynamic DRAM partitioning against fixed static configurations and manually optimized ideal baselines.
+For baseline comparison, we evaluate three configurations. First, we run Lucene
+using TeraHeap with a static DRAM partition, allocating 50\% of the 40 GB DRAM
+budget to H1 (managed heap) and 50\% to H2 (page cache backed by NVMe storage),
+representing a typical balanced setup when no detailed tuning is performed.
+%
+Second, we run Lucene with hand-tuned ideal configurations, where the DRAM
+allocation between H1 and H2 is manually optimized to minimize execution time
+and garbage collection overheads for each benchmark. 
+%
+Finally, we evaluate our
+Dynamic Heap Resizer, which automatically adjusts the size of H1 at runtime.
+This experimental setup enables us to compare the effectiveness of dynamic DRAM
+partitioning against fixed static configurations and manually optimized ideal
+baselines.
 % For baseline comparison, we evaluate two configurations. First, we run Lucene using TeraHeap with a static DRAM partition, allocating 50\% of the 40 GB DRAM budget to H1 (managed heap) and 50\% to H2 (page cache backed by NVMe storage). This 50-50 configuration represents the commonly recommended default setup, as it provides a balanced trade-off without requiring detailed workload-specific tuning, and is therefore widely adopted in practice. Secondly, we evaluate our Dynamic Heap Resizer, which automatically adjusts the size of H1 at runtime based on observed GC and I/O costs. The Dynamic Heap Resizer is initially launched with a DRAM allocation of 95\% to H1 and only 5\% to the H2 page cache, allowing it to adaptively shrink or grow the managed heap as needed during execution. This experimental setup enables us to compare the effectiveness of dynamic DRAM partitioning against fixed static configurations and manually optimized ideal baselines
