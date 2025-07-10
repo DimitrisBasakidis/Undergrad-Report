@@ -6,23 +6,40 @@
 % a second heap over storage device. Say that they use I/O cache to reduce slow
 % accesses to the storage device. These systems thy need to divide dynamically the
 % DRAM between H1 and I/O cache for H2.}
-Managed runtimes must efficiently balance memory allocation across dynamically changing workloads, 
-especially under constrained DRAM environments. As DRAM capacity scaling has slowed, systems like
-TeraHeap extend the Java heap over fast storage devices such as NVMe SSDs to handle large data volumes.
-To minimize garbage collection (GC) overheads while leveraging storage capacity, teraHeap employs a 
-tiered heap design with two regions: H1, a primary heap for GC-managed short-lived objects
-and H2, a secondary heap mapped to storage for long-lived data. To accelerate accesses 
-to H2 and avoid frequent slow I/O operations, a portion of DRAM is also used as a page cache for H2.
+Managed runtimes must efficiently balance memory allocation across dynamically
+changing workloads, especially under constrained DRAM environments. As DRAM
+capacity scaling has slowed, systems like TeraHeap extend the Java heap over
+fast storage devices such as NVMe SSDs to handle large data volumes. To minimize
+garbage collection (GC) overheads while leveraging storage capacity, \note{jk:
+fix the name - is TeraHeap and not teraHeap. Check carefully all the text} teraHeap
+employs a tiered heap design with two regions \note{is not two regions is two
+heaps. Please write the text carefully!!!}: H1, a primary heap for \note{jk: all
+objects are GC-managed} GC-managed
+short-lived objects and H2, a secondary heap mapped to storage for long-lived
+data. To accelerate accesses to H2 and avoid frequent slow I/O operations, a
+portion of DRAM is also used as a page cache for H2.
 
-However, current systems such as TeraHeap statically divide DRAM between H1 and the page cache for H2, 
-lacking dynamic adaptability to changes in application memory pressure or I/O demands. In this work, 
-we extend TeraHeap with a Dynamic Heap Resizer that adjusts the DRAM partitioning between H1 and the 
-H2 cache at runtime. Our approach monitors total lost compute cycles, combining GC-induced CPU contention 
-and I/O wait delays, to decide whether to grow or shrink H1 dynamically. The resizer uses a lightweight policy 
-engine fully integrated into the OpenJDK’s G1 TeraHeap implementation and requires no manual tuning or application-specific knowledge.
+\note{jk: this sentence is part of the problem. move it to the previous
+  paragraph. Also, reduce the problem description. make it more cripsy and
+clear as I wrote you in the previous comments}. However, current systems such as TeraHeap statically divide DRAM between H1 and
+the page cache for H2, lacking dynamic adaptability to changes in application
+memory pressure or I/O demands. \note{jk: I know that for your writing you are
+using chatgpt... It is ok to use it, but please try to keep the text to the
+point... there is no need for extra unnecessary information.}
 
-We evaluate our system on Lucene, a widely used full-text search engine, under varied memory-constrained scenarios.
-Results show that the Dynamic Heap Resizer significantly improves adaptability and performance stability across workloads. 
-It efficiently reclaims memory during idle periods to enhance system utilization and reallocates heap space under load to maintain 
-throughput, outperforming ideal TeraHeap configurations under constrained DRAM in both responsiveness and efficiency.
+In this work, we extend TeraHeap with a Dynamic
+Heap Resizer that adjusts the DRAM partitioning between H1 and the H2 cache at
+runtime. Our approach monitors total lost compute cycles, combining GC-induced
+CPU contention and I/O wait delays, to decide whether to grow or shrink H1
+dynamically. The resizer uses a lightweight policy engine fully integrated into
+the OpenJDK’s G1 TeraHeap implementation and requires no manual tuning or
+application-specific knowledge.
+
+We evaluate our system on Lucene, a widely used full-text search engine, under
+varied memory-constrained scenarios. Results show that the Dynamic Heap Resizer
+significantly improves adaptability and performance stability across workloads.
+It efficiently reclaims memory during idle periods to enhance system utilization
+and reallocates heap space under load to maintain throughput, outperforming
+ideal TeraHeap configurations under constrained DRAM in both responsiveness and
+efficiency.
 \end{abstract}
