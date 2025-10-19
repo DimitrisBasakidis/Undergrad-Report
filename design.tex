@@ -1,1 +1,182 @@
 \section{Design}
+
+In order for FlexHeap to effectively resize 
+the heap and give the appropriate amount of DRAM to the page 
+cache, it must accurately detect when performance bottlenecks occur
+from garbage collection (GC) or I/O. 
+In this section, we discuss FlexHeap's FSM for resizing actions, the 
+internal mechanisms of G1, describe the different types of GC overhead scenarios and how they 
+are measured and explain how FlexHeap operates on sampling intervals to collect GC and I/O metrics.
+\subsection{Interval-Based Measurement Model}
+
+An interval is a custom measurement that is defined as the duration between two consecutive calls to the \texttt{dram\_repartition()} function.
+\texttt{Dram\_repartition()} a FlexHeap function, responsible for comparing GC and I/O overheads
+and making DRAM resizing decisions accordingly. 
+This function is inserted at key GC safepoints within the G1 garbage collector, specifically at the end of the following phases: 
+
+\begin{itemize}
+  \item \texttt{G1CollectedHeap::do\allowbreak\_collection\allowbreak\_pause\allowbreak\_at\allowbreak\_safepoint\allowbreak\_helper()} for young and mixed collections,
+  \item \texttt{ConcurrentMark::remark()} for the end of the concurrent marking cycle,
+  \item \texttt{G1FullCollector::collect()} for full garbage collections.
+\end{itemize}
+
+Since G1 dynamically chooses which collection path to execute based on the application's needs, only one of these safepoint 
+locations is reached per interval. As such, the interval begins immediately after a call to \texttt{dram\_repartition()} 
+and ends when \texttt{dram\_repartition()} is next invoked.
+
+Each interval therefore includes two components: a period of mutator (application) thread execution 
+and any GC activity that occurs during that time. At the end of the interval, runtime statistics are 
+collected and used to evaluate and adjust the 
+DRAM partitioning accordingly for the next interval.
+
+
+\subsection{G1 mechanisms and calculation of GC overheads}
+In G1, garbage collection overhead comes from three primary sources:
+
+\begin{itemize}
+  \item \textbf{Stop-the-world (STW) pauses:} These are safepoint events
+  where all application threads (mutators) are paused so that the JVM can exclusively perform 
+  GC-related work. In order to calculate the time overheads produced by G1’s stop-the-world (STW) phases, we measure the time spent inside key G1 safepoint functions. 
+  Specifically, we place timers around functions such as \texttt{ConcurrentMark::remark()}, which is part of the concurrent marking cycle and performs the final reachability check to ensure that all live objects are identified before resuming execution. 
+  We also track the duration of \texttt{G1CollectedHeap::do\allowbreak\_collection\allowbreak\_pause\allowbreak\_at\allowbreak\_safepoint\allowbreak\_helper()}, which encapsulates the STW pause during young and mixed collections, as well as \texttt{G1FullCollector::collect()}, which initiates a full GC event. 
+  Finally, \texttt{G1CollectedHeap::prepare\_heap\_for\_mutators()} marks the end of GC and the point where application (mutator) threads resume.
+
+  Not all of these functions are invoked in each and every interval, we monitor only those that are executed by the G1 GC path during the given interval. 
+
+  To translate this time into CPU overhead, we use the following formula:
+  \[
+  \text{cpu\_time\_spent} += \text{gc\_pause\_time} \times \min(\text{mutators}, \text{cores})
+  \]
+  This formula estimates the compute time lost due to GC pauses by considering both the duration of the pauses and the level of available parallelism. 
+  Although mutator threads are inactive during STW events, they represent potential application work that is delayed. 
+  By only counting the threads that could actually run at the same time, we get a more accurate and realistic estimate of how much the application was slowed down. 
+
+  \item \textbf{Concurrent GC threads:} These threads operate in the background,
+  concurrently with application execution. They are responsible for marking live 
+  objects, reclaiming unreachable memory, and performing cleanup tasks such as region 
+  classification. While these threads improve throughput by avoiding long pauses, they 
+  still consume CPU cycles, that are classified as GC overheads.
+
+  To account for compute cycles lost to concurrent GC threads, 
+  we must determine whether GC activity actually interferes with 
+  application (mutator) execution. This interference occurs only when 
+  the system is oversubscribed—that is, when the combined number of 
+  mutator threads and concurrent GC threads exceeds the number of available 
+  CPU cores, resulting in context switching. In such cases, concurrent GC threads compete with the application 
+  for CPU time, causing actual slowdown.
+
+  If the system is not oversubscribed meaning that the number of mutator and GC
+  threads together is less or equal than the number of cores, then the concurrent 
+  GC threads are able to run on otherwise idle CPUs. In this case, we assume that
+  CPUs remaining idle do not cause performance loss.
+
+  Even in oversubscribed conditions, we avoid attributing all GC time as overhead.
+  We first subtract the amount of time GC threads could have used on idle cores estimated 
+  as the number of free cores \texttt{\#cores} $-$ \texttt{\#mutators} $x$ \texttt{interval\_duration} .
+  The remaining time is treated as actual interference with the
+  application and is counted as GC overhead.
+
+  This logic is summarized as:
+
+  \begin{center}
+  \textit{GC overhead} = GC thread time $-$ time spent on idle cores (if oversubscribed), else $0$
+  \end{center}
+
+  \item \textbf{Refinement threads:} G1 uses card tables and remembered sets to track 
+  inter-region references. Refinement threads are responsible for processing these write
+  barriers and maintaining the remembered sets, which are a part of 
+  concurrent collection. 
+  the full runtime of refinement threads is interpreted as GC overhead. This is because refinement thread 
+  activity directly supports concurrent GC phases and typically runs in the background,
+  contributing 100\% of their execution time to GC-related compute loss.
+
+\end{itemize}
+
+To measure garbage collection overhead, our system tracks the cumulative CPU time spent in each of these three components. 
+This data is collected in each interval and used by FlexHeap to determine whether GC-related costs are increasing or decreasing.
+
+\subsection{Heap resizing Finate State Machine}
+
+After FlexHeap collects the GC and I/O overheads of any given interval, it passes the metrics through 
+a \textit{finite state machine (FSM)}. The FSM serves as a control mechanism 
+that reacts to both GC and I/O overhead percent changes and decides whether to adjust the DRAM allocation 
+between the heap (H1) and the page-cache. The FSM is evaluated at the end of every interval with a
+call to the \texttt{dram\_repartition()} function. It consists of 3 states:
+
+Firstly, the \texttt{wait\_after\_grow} state represents a phase that occurs after 
+the system has increased the size of the heap (H1). Its purpose is to 
+to monitor whether the previous growth decision effectively 
+reduced overall overheads. 
+
+Each time the state is evaluated, FlexHeap retrieves runtime data from the G1 collector, 
+such as the current heap capacity, used and unused regions in bytes and the concurrent marking 
+start threshold (IHOP), to determine whether the heap is approaching 
+a GC initiation and whether there is available space to grow further.
+
+The decision logic follows several key checks:
+\begin{itemize}
+  \item If the total overhead has increased compared to the previous interval, the system
+    compares the relative growth rates of GC and I/O time. If GC overhead increased more than I/O, 
+    FlexHeap interprets this as insufficient heap space and issues a \texttt{GROW\_HEAP} action, 
+    provided the heap has not reached its maximum capacity. 
+  \item Conversely, if I/O overhead increased more than GC and the heap utilization is below 95\% of
+    total capacity, the system transitions to the \texttt{wait\_after\_shrink} state and issues a 
+    \texttt{SHRINK\_HEAP} action, transferring DRAM to the page cache.
+  \item If none of these conditions are met, the system goes to a \texttt{no\_action\_state}.
+\end{itemize}
+
+Also, IHOP acts as a safety condition. If the heap usage falls below the 
+IHOP limit and the current capacity is under the maximum allowed size, the FSM remains in the 
+grow state waiting to see if the system will stabilize, without issuing any further grow actions.
+
+The second state is the \texttt{wait\_after\_shrink}. Its purpose is to 
+observe how the system behaves after freeing DRAM back to the page cache. During this
+state, the FSM compares the garbage collection (GC) with the I/O to determine whether
+the shrink operation had reduced I/O pressure or if further resizing actions are required.
+
+The core logic of this state is as follows:
+\begin{itemize}
+  % \item If the total overhead (\texttt{gc\_time\_ms + io\_time\_ms}) remains nearly unchanged
+  % from the previous interval (within a 5\% margin) and the heap usage is below the IHOP threshold, 
+  % the system transitions to the \texttt{no\_action} state. This indicates that the system has stabilized 
+  % after shrinking and no further changes are necessary.
+  
+  \item 
+  If GC overhead increased more than I/O, it indicates that shrinking the heap too aggressively,
+  led to increased GC activity. In this case, the system transitions to the \texttt{wait\_after\_grow} state
+  and performs a \texttt{GROW\_HEAP} action to give memory to the heap.
+  
+  \item If I/O overhead increased  the system stays in the \texttt{wait\_after\_shrink} state and issues further shrinks.
+  If heap usage is still high (above 90\%), the FSM may also decide to grow again to relieve GC pressure.
+\end{itemize}
+
+Additionally, the state monitors total resident memory (rss) and page cache usage.
+If the sum of resident memory and page cache usage falls below 80\% 
+of the configured DRAM limit, the FSM interprets is as (\texttt{IOSLACK}) and 
+issues another \texttt{SHRINK\_HEAP} action to allocate more memory to the page cache. This allows 
+to reclaim unused DRAM to relieve I/O when the system is under light memory pressure.
+
+If none of these conditions are triggered, the FSM 
+transitions to \texttt{no\_action}.
+
+At last the \texttt{no\_action} state, which is the default state.
+When the system enters this state, no DRAM resizing actions were performed.
+
+At each interval, FlexHeap evaluates whether the total GC and I/O time (\texttt{gc\_time\_ms + io\_time\_ms}) has
+changed. If the change is within a 5\% threshold, it is interpreted 
+as noise or a stable condition and the system remains in the \texttt{no\_action} state.
+
+If the combined overhead has increased notably and the system is in this state, the FSM analyzes which overhead (GC or I/O) is 
+contributing more to the increase:
+\begin{itemize}
+  \item If GC overhead has increased more than I/O, this suggests that H1 may need a grow action. 
+  In that case, FlexHeap transitions to the \texttt{wait\_after\_grow} state and issues a \texttt{GROW\_HEAP} action, 
+  unless the heap has already reached its maximum capacity.
+
+  \item If I/O overhead increased more, FlexHeap checks if heap usage is above 90\% of 
+  its capacity. If not, the system transitions to \texttt{wait\_after\_shrink} and issues a \texttt{SHRINK\_HEAP} 
+  action to return DRAM to the page cache.
+\end{itemize}
+
+If the total overhead has decreased compared to the previous interval, no resizing action is needed. In this case, 
+the system remains in the \texttt{no\_action} state.

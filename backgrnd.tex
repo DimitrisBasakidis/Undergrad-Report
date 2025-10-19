@@ -1,94 +1,25 @@
 \section{Background}
-In order for FlexHeap to effectively resize 
-the heap and give the appropriate amount of DRAM to the page 
-cache, it must accurately detect when performance bottlenecks occur
-from garbage collection (GC) or I/O. 
-In this section, we provide background on the 
-internal mechanisms of G1, describe the different types of GC overhead scenarios and how they 
-are measured, break down how TeraHeap introduces I/O through page cache accesses to the remote heap (H2) 
-and explain how FlexHeap operates on sampling intervals to collect GC and I/O metrics.
-\subsection{Interval-Based Measurement Model}
 
-An interval is a custom measurement that is defined as the duration between two consecutive calls to the \texttt{dram\_repartition()} function.
-The \texttt{dram\_repartition()} function is responsible for comparing GC and I/O overheads
-and making DRAM resizing decisions accordingly. Although the internal logic of this decision-making is discussed in detail 
-in the next section, it serves as the signal point between intervals. 
-This function is inserted at key GC safepoints within the G1 garbage collector, specifically at the end of the following phases: 
-
-\begin{itemize}
-  \item \texttt{G1CollectedHeap::do\allowbreak\_collection\allowbreak\_pause\allowbreak\_at\allowbreak\_safepoint\allowbreak\_helper()} for young and mixed collections,
-  \item \texttt{ConcurrentMark::remark()} for the end of the concurrent marking cycle,
-  \item \texttt{G1FullCollector::collect()} for full garbage collections.
-\end{itemize}
-
-Since G1 dynamically chooses which collection path to execute based on the application's needs, only one of these safepoint 
-locations is reached per interval. As such, the interval begins immediately after a call to \texttt{dram\_repartition()} 
-and ends when \texttt{dram\_repartition()} is next invoked.
-
-Each interval therefore includes two components: a period of mutator (application) thread execution 
-and any GC activity that occurs during that time. At the end of the interval, runtime statistics are 
-collected and used to evaluate and adjust the 
-DRAM partitioning accordingly for the next interval.
+\subsection{Page Cache I/O in TeraHeap}
 
 
-\subsection{G1 mechanisms and calculation of GC overheads}
-In G1, garbage collection overhead comes from three primary sources:
+TeraHeap extends the JVM by introducing a secondary heap, 
+(H2), which is on a file in a remote device and accesses are passed through 
+the operating system’s page cache. When marked objects get 
+transferred from the on-heap memory (H1) to the H2 file, 
+in order to be accessed later, they must first be brought back 
+into memory through the page cache. 
 
-\begin{itemize}
-  \item \textbf{Stop-the-world (STW) pauses:} These are safepoint events
-  where all application threads (mutators) are paused so that the JVM can exclusively perform 
-  GC-related work. In order to calculate the time overheads produced by G1’s stop-the-world (STW) phases, we measure the time spent inside key G1 safepoint functions. 
-  Specifically, we place timers around functions such as \texttt{ConcurrentMark::remark()}, which is part of the concurrent marking cycle and performs the final reachability check to ensure that all live objects are identified before resuming execution. 
-  We also track the duration of \texttt{G1CollectedHeap::do\allowbreak\_collection\allowbreak\_pause\allowbreak\_at\allowbreak\_safepoint\allowbreak\_helper()}, which encapsulates the STW pause during young and mixed collections, as well as \texttt{G1FullCollector::collect()}, which initiates a full GC. 
-  Finally, \texttt{G1CollectedHeap::prepare\_heap\_for\_mutators()} marks the end of GC and the point where application (mutator) threads resume.
+This design uses the page cache to manage access to H2, 
+but causes I/O when data is loaded from or written to disk. Each time an object 
+stored in H2 is accessed, the corresponding pages are loaded. When 
+the page cache becomes full, these loads trigger evictions of previously existing pages, which in 
+turn generate read and write operations to the H2 file. Also when the data 
+size that is brought to the page-cache exceeds the available capacity, repeated evictions and reloads occur, 
+producing increasead I/O. This behavior constitutes the primary source of I/O 
+overhead in TeraHeap.
 
-  Not all of these functions are invoked in each and every interval, we monitor only those that are executed by the G1 GC path during the given interval. 
-
-  To translate this time into CPU overhead, we use the following formula:
-  \[
-  \text{cpu\_time\_spent} += \text{gc\_pause\_time} \times \min(\text{mutators}, \text{cores})
-  \]
-  This formula estimates the compute time lost due to GC pauses by considering both the duration of the pauses and the level of available parallelism. 
-  Although mutator threads are inactive during STW events, they represent potential application work that is delayed. 
-  By only counting the threads that could actually run at the same time, we get a more accurate and realistic estimate of how much the application was slowed down. 
-
-  \item \textbf{Concurrent GC threads:} These threads operate in the background,
-  concurrently with application execution. They are responsible for marking live 
-  objects, reclaiming unreachable memory, and performing cleanup tasks such as region 
-  classification. While these threads improve throughput by avoiding long pauses, they 
-  still consume CPU cycles.
-  To account for the CPU overhead caused by concurrent GC threads, we compute \texttt{conc\_gc\_thr\_cpu\_time} as follows:
-
-  \[
-  \texttt{conc\_gc\_thr\_cpu\_time} = 
-  \begin{cases}
-  \texttt{conc\_gc\_thr\_cpu\_time} - \max(0, (\texttt{\#cores} - \texttt{\#mutators}) \times \texttt{interval}) & \text{if }
-  \texttt{\#mutators} + \texttt{\#gc\_conc\_threads} > \texttt{\#cores} \\
-  0 & \text{otherwise}
-  \end{cases}
-  \]
-
-  This logic captures the effect of CPU oversubscription. When the total number of mutator and concurrent GC threads exceeds the number of available physical cores, the concurrent GC threads compete with the application for CPU time. In this case, we assume that only the fraction of GC time that actually contended for CPU resources contributes to lost compute cycles. Therefore, we subtract the portion of GC thread time that would have occurred on otherwise idle cores.
-
-  The term \texttt{(\#cores - \#mutators) × interval} estimates the maximum time GC threads could have used without interfering with mutators. If this value is positive, it is subtracted from the measured GC thread time. If all cores are already occupied by mutators, the full concurrent GC thread time is counted as overhead. When the system is not oversubscribed, we assume concurrent GC threads do not delay mutators and assign zero overhead.
-
-  In practice, \texttt{conc\_gc\_thr\_cpu\_time} is updated based on whether a GC thread was interrupted. If uninterrupted, we accumulate time directly using:
-  \[
-  \texttt{conc\_gc\_thr\_cpu\_time} += \texttt{conc\_gc\_thr\_cpu\_total\_time[i]}
-  \]
-  If a thread was interrupted, we compute the time by comparing the current thread CPU time to the last recorded start time:
-  \[
-  \texttt{conc\_gc\_thr\_cpu\_time} += \texttt{conc\_gc\_thr\_cpu\_total\_time[i]} + (\texttt{current\_thread\_cpu\_time} - \texttt{conc\_gc\_thr\_cpu\_start\_time[i]})
-  \]
-
-  This mechanism ensures that only the effective GC thread activity that could interfere with application performance is captured as lost compute cycles.
-
-  \item \textbf{Refinement threads:} G1 uses card tables and remembered sets to track 
-  inter-region references. Refinement threads are responsible for processing these write
-  barriers and maintaining the remembered sets, which are essential for incremental and 
-  concurrent collection. These threads introduce additional CPU overhead and can become a
-  bottleneck when the number of cross-region references is high.
-\end{itemize}
-
-To measure garbage collection overhead, our system tracks the cumulative CPU time spent in each of these three components. This data is collected periodically and used by FlexHeap to determine whether GC-related costs are increasing or decreasing across sampling intervals.
+Although additional I/O operations such as log writing, file reads, print/debug outputs
+may also occur during the execution of applications, they are typically considered secondary and contribute much less to 
+overall system I/O. 
 
