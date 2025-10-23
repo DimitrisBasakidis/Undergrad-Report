@@ -1,23 +1,42 @@
 \begin{abstract}
-	\note{jk: TeraHeap does not use remote memory. It uses fast storage devices.
-		Also, TeraHeap does not divide DRAM in two components but it uses two
-		heapHeap does not divide DRAM in two components but it uses two heaps. In the
-		problem statement you have to show the effects of GC and I/O costs}
-	TeraHeap is a dual heap memory management system
-	designed to support tiered memory by partitioning the DRAM budget between two
-	heaps: The fast heap (H1), which resides on-heap and the remote heap (H2),
-	which is backed by a remote file and accessed through the operating system's
-	page cache. \note{jk: I do not understand this sentence. Please write carefully. Each word counts!!!}This division is managed statically which can lead to memory
-	pressure on H1 while H2 remains underutilized, while the excess memory could
-	be transfered over to H1 reducing the pressure, or vice versa.
+	% \note{jk: TeraHeap does not use remote memory. It uses fast storage devices.
+	% 	Also, TeraHeap does not divide DRAM in two components but it uses two
+	% 	heapHeap does not divide DRAM in two components but it uses two heaps. In the
+	% 	problem statement you have to show the effects of GC and I/O costs}
+	% TeraHeap is a dual heap memory management system
+	% designed to support tiered memory by partitioning the DRAM budget between two
+	% heaps: The fast heap (H1), which resides on-heap and the remote heap (H2),
+	% which is backed by a remote file and accessed through the operating system's
+	% page cache. \note{jk: I do not understand this sentence. Please write carefully. Each word counts!!!}This division is managed statically which can lead to memory
+	% pressure on H1 while H2 remains underutilized, while the excess memory could
+	% be transfered over to H1 reducing the pressure, or vice versa.
+	%
+	% In this thesis, we address this problem \note{jk: what problem??} by
+	% integrating a dynamic DRAM partitioning mechanism into TeraHeap. \note{jk:
+	% 	write in high level what does this dynamic resizing policy do.} We port
+	% FlexHeap, a resizing policy designed to monitor runtime
+	% memory behavior and adjust the DRAM split between H1 and H2 accordingly. By
+	% enabling adaptive heap resizing, we aim to improve memory utilization and
+	% optimize both garbage collection and I/O overheads, under dynamic workloads
+	% with shifting memory demands.\note{jk: add some high level results!!!
 
-	In this thesis, we address this problem \note{jk: what problem??} by
-	integrating a dynamic DRAM partitioning mechanism into TeraHeap. \note{jk:
-		write in high level what does this dynamic resizing policy do.} We port
-	FlexHeap, a resizing policy designed to monitor runtime
-	memory behavior and adjust the DRAM split between H1 and H2 accordingly. By
-	enabling adaptive heap resizing, we aim to improve memory utilization and
-	optimize both garbage collection and I/O overheads, under dynamic workloads
-	with shifting memory demands.\note{jk: add some high level results!!!}
+  % corrected
 
-\end{abstract}
+  TeraHeap is a memory management system supporting a dual heap design:
+  the heap (H1), and the (H2) which is memory-mapped over a storage device
+  and is accessed via the OS page cache. In order to be decided, how much memory goes into 
+  H1 and the page-cache, it has to be statically configured, in the beginning of an execution.
+  This leaves the system without adaptability during execution. H1 may need more memory, when it cannot
+  get it, GC runs more often and for longer, increasing pause times and delaying the application.
+  Conversely, when the page cache is smaller than it could be, storage traffic rises by increasing I/O wait,
+  page evictions, and the system repeatedly reads from the H2 file.
+
+  In this thesis, we address the lack of adaptability in TeraHeap’s static DRAM split, by integrating  
+  FlexHeap, a dynamic heap resizing mechanism into TeraHeap. FlexHeap is, a resizing policy that monitors 
+  at runtime GC and I/O. Based on these metrics it resizes the Garbage Collector's heap accordingly
+  and assigns the rest of the DRAM budget to the page-cache via cgroups. In our evaluation, we show that FlexHeap
+  improves the execution time of Lucene's benchmarks up to 70\%, while also reducing GC time and H2 file reads 
+  on average by 28\% and 13\%.
+   
+
+  \end{abstract}
