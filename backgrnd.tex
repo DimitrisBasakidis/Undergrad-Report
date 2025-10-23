@@ -1,25 +1,31 @@
 \section{Background}
 
+\note{jk: Dimitri I want you to think what you are writing... What does it mean
+	Page Cache I/O ? it does not make sense. Your intention of this section is to provide a background on how TeraHeap works.}
+
 \subsection{Page Cache I/O in TeraHeap}
 
 
-TeraHeap extends the JVM by introducing a secondary heap, 
-(H2), which is on a file in a remote device and accesses are passed through 
-the operating system’s page cache. When marked objects get 
-transferred from the on-heap memory (H1) to the H2 file, 
-in order to be accessed later, they must first be brought back 
-into memory through the page cache. 
+TeraHeap extends the JVM by introducing a secondary heap,
+(H2), which is on a file \note{jk: are you using a remote device on another
+	node??? the device is local.. please be carefull on what your writing.} in a
+remote device and accesses are passed through
+the operating system’s page cache. \note{jk: Explain that the second heap is
+	memory-mapped over the storage device. this is how you access the second
+	heap}When marked objects get transferred from the on-heap memory (H1) to the H2
+file, in order to be accessed later, they must first be brought back
+into memory through the page cache.
 
-This design uses the page cache to manage access to H2, 
-but causes I/O when data is loaded from or written to disk. Each time an object 
-stored in H2 is accessed, the corresponding pages are loaded. When 
-the page cache becomes full, these loads trigger evictions of previously existing pages, which in 
-turn generate read and write operations to the H2 file. Also when the data 
-size that is brought to the page-cache exceeds the available capacity, repeated evictions and reloads occur, 
-producing increasead I/O. This behavior constitutes the primary source of I/O 
-overhead in TeraHeap.
+This design uses the page cache to manage access to H2, but causes I/O when
+data is loaded from or written to disk. Each time an object stored in H2 is
+accessed, the corresponding pages are loaded. When the page cache becomes full,
+these loads trigger evictions of previously existing pages, which in turn
+generate read and write operations to the H2 file. Also when the data size that
+is brought to the page-cache exceeds the available capacity, repeated evictions
+and reloads occur, producing increasead I/O. This behavior constitutes the
+primary source of I/O overhead in TeraHeap.
 
-Although additional I/O operations such as log writing, file reads, print/debug outputs
-may also occur during the execution of applications, they are typically considered secondary and contribute much less to 
-overall system I/O. 
+Although additional I/O operations such as log writing, file reads, print/debug
+outputs may also occur during the execution of applications, they are typically
+considered secondary and contribute much less to overall system I/O.
 
