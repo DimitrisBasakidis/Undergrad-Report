@@ -1,15 +1,23 @@
 \begin{abstract}
-  TeraHeap \cite{teraheap_asplos} is a dual heap memory management system designed to support tiered memory 
-by partitioning the DRAM budget between two heaps: The fast heap (H1), which resides on-heap
-and the remote heap (H2), which is backed by a remote file and accessed through the operating system's page cache.
-This division is managed statically which can lead to memory pressure on H1 while H2 remains underutilized,
-while the excess memory could be transfered over to H1 reducing the pressure, or vice versa.
+	\note{jk: TeraHeap does not use remote memory. It uses fast storage devices.
+		Also, TeraHeap does not divide DRAM in two components but it uses two
+		heapHeap does not divide DRAM in two components but it uses two heaps. In the
+		problem statement you have to show the effects of GC and I/O costs}
+	TeraHeap is a dual heap memory management system
+	designed to support tiered memory by partitioning the DRAM budget between two
+	heaps: The fast heap (H1), which resides on-heap and the remote heap (H2),
+	which is backed by a remote file and accessed through the operating system's
+	page cache. \note{jk: I do not understand this sentence. Please write carefully. Each word counts!!!}This division is managed statically which can lead to memory
+	pressure on H1 while H2 remains underutilized, while the excess memory could
+	be transfered over to H1 reducing the pressure, or vice versa.
 
-In this thesis, we address this problem by integrating a dynamic DRAM partitioning mechanism into the 
-G1-based version of TeraHeap \cite{mairh_thesis, melidonis_thesis}. We port FlexHeap \cite{flexheap}, 
-a resizing policy designed to monitor runtime memory behavior
-and adjust the DRAM split between H1 and H2 accordingly. By enabling adaptive heap resizing, 
-we aim to improve memory utilization and optimize both garbage collection and I/O overheads,
-under dynamic workloads with shifting memory demands. 
+	In this thesis, we address this problem \note{jk: what problem??} by
+	integrating a dynamic DRAM partitioning mechanism into TeraHeap. \note{jk:
+		write in high level what does this dynamic resizing policy do.} We port
+	FlexHeap, a resizing policy designed to monitor runtime
+	memory behavior and adjust the DRAM split between H1 and H2 accordingly. By
+	enabling adaptive heap resizing, we aim to improve memory utilization and
+	optimize both garbage collection and I/O overheads, under dynamic workloads
+	with shifting memory demands.\note{jk: add some high level results!!!}
 
 \end{abstract}
