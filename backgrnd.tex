@@ -1,33 +1,47 @@
 \section{Background}
 
-\note{jk: Dimitri I want you to think what you are writing... What does it mean
-	Page Cache I/O ? it does not make sense. Your intention of this section is to provide a background on how TeraHeap works.}
-
-\note{jk: Add a background explaining the types of GC in G1GC.}
 
 \subsection{Page Cache I/O in TeraHeap}
 
 
-TeraHeap extends the JVM by introducing a secondary heap,
-(H2), which is on a file \note{jk: are you using a remote device on another
-	node??? the device is local.. please be carefull on what your writing.} in a
-remote device and accesses are passed through
-the operating system’s page cache. \note{jk: Explain that the second heap is
-	memory-mapped over the storage device. this is how you access the second
-	heap}When marked objects get transferred from the on-heap memory (H1) to the H2
-file, in order to be accessed later, they must first be brought back
-into memory through the page cache.
+TeraHeap extends the JVM by introducing a secondary heap (H2), is a memory-mapped file,
+on a storage device, for less frequenlty accessed objects.
+Objects can be marked and then transferred, from G1-Collectors's heap (H1), to the H2 file.
+To access these objects later, the data must first be fetched back through the page cache.
 
-This design uses the page cache to manage access to H2, but causes I/O when
-data is loaded from or written to disk. Each time an object stored in H2 is
-accessed, the corresponding pages are loaded. When the page cache becomes full,
+This design causes I/O when data is loaded from or written. Each time an object stored in H2 is
+accessed, the corresponding pages are loaded, in page segments. When the page cache becomes full,
 these loads trigger evictions of previously existing pages, which in turn
-generate read and write operations to the H2 file. Also when the data size that
-is brought to the page-cache exceeds the available capacity, repeated evictions
+generate read and write operations to the H2 file. Also when the data size 
+brought into the page-cache exceeds the available capacity, repeated evictions
 and reloads occur, producing increasead I/O. This behavior constitutes the
 primary source of I/O overhead in TeraHeap.
 
 Although additional I/O operations such as log writing, file reads, print/debug
 outputs may also occur during the execution of applications, they are typically
 considered secondary and contribute much less to overall system I/O.
+
+\subsection{GC Types in G1-Garbage Collector}
+In the G1 garbage collector, GC overheads occur from 3 key
+mechanisms that operate either at safepoints or concurrently with the application.
+These contributors to GC-related CPU overhead are:
+
+\textbf{1. Stop-the-World (STW) Pauses:}  
+G1 performs certain tasks such as root scanning, object copying, or final marking and heap related operations
+like young generation collections, mixed collections and full GCs. Such phases are exeuted in safepoints
+where all application (mutator) threads are suspended. These are called \emph{stop-the-world} events and
+directly block application execution resulting in major latency spikes.
+
+\textbf{2. Concurrent GC Threads:}  
+To reduce pause times, G1 assigns specific GC work to dedicated concurrent threads that run 
+alongside the executors. These threads are responsible for concurrent markings.
+While these operations are designed to be background activities,
+they still consume CPU cycles, due to context switches. Also, if the number of GC threads plus mutator threads exceeds the available 
+CPU cores, they compete for CPU time, leading to potential application slowdowns due to oversubscription.
+
+\textbf{3. Refinement Threads:}  
+G1 uses a card table and remembered sets to track cross-region references. Refinement threads 
+are responsible for updating these remembered sets with references to objects existing in the old generation. 
+This mechanism ensures correctness during evacuation but introduces additional CPU overhead, especially under write-heavy workloads.
+
 

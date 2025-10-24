@@ -23,7 +23,7 @@
 	% corrected
 
 	TeraHeap is a memory management system supporting a dual heap design: the
-	primary heap (H1) in DRAM, and the second heap (H2) which is memory-mapped
+	primary heap (H1) in DRAM, and the secondary heap (H2) which is memory-mapped
 	over a storage device and is accessed via the OS page cache. In order to be
 	decided, how much memory goes into H1 and the page-cache for H2, it has to be
 	statically configured, in the beginning of an execution. This leaves the
@@ -33,7 +33,7 @@
 	it could be, storage traffic rises by increasing I/O wait, page evictions,
 	and the system repeatedly reads from the H2 file.
 
-	In this thesis, we address the lack of adaptability in TeraHeap’s static DRAM
+	In this thesis, we address the DRAM division problem in TeraHeap’s static DRAM
 	split, by integrating  FlexHeap, a dynamic heap resizing mechanism into
 	TeraHeap. FlexHeap is, a resizing policy that monitors at runtime GC and I/O.
 	Based on these metrics it resizes the Garbage Collector's heap accordingly

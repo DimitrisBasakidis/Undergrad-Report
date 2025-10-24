@@ -4,8 +4,8 @@ In order for FlexHeap to effectively resize
 the heap and give the appropriate amount of DRAM to the page 
 cache, it must accurately detect when performance bottlenecks occur
 from garbage collection (GC) or I/O. 
-In this section, we discuss FlexHeap's FSM for resizing actions, the 
-internal mechanisms of G1, describe the different types of GC overhead scenarios and how they 
+In this section, we discuss FlexHeap's FSM for resizing actions,
+describe the different types of GC overhead scenarios and how they 
 are measured and explain how FlexHeap operates on sampling intervals to collect GC and I/O metrics.
 \subsection{Interval-Based Measurement Model}
 
@@ -30,12 +30,12 @@ collected and used to evaluate and adjust the
 DRAM partitioning accordingly for the next interval.
 
 
-\subsection{G1 mechanisms and calculation of GC overheads}
+\subsection{Calculation of GC overheads}
 In G1, garbage collection overhead comes from three primary sources:
 
 \begin{itemize}
-  \item \textbf{Stop-the-world (STW) pauses:} These are safepoint events
-  where all application threads (mutators) are paused so that the JVM can exclusively perform 
+  \item \textbf{Measuring Stop-the-world (STW) pauses:} In these events
+  all application threads (mutators) are paused so that the JVM can exclusively perform 
   GC-related work. In order to calculate the time overheads produced by G1’s stop-the-world (STW) phases, we measure the time spent inside key G1 safepoint functions. 
   Specifically, we place timers around functions such as \texttt{ConcurrentMark::remark()}, which is part of the concurrent marking cycle and performs the final reachability check to ensure that all live objects are identified before resuming execution. 
   We also track the duration of \texttt{G1CollectedHeap::do\allowbreak\_collection\allowbreak\_pause\allowbreak\_at\allowbreak\_safepoint\allowbreak\_helper()}, which encapsulates the STW pause during young and mixed collections, as well as \texttt{G1FullCollector::collect()}, which initiates a full GC event. 
@@ -51,13 +51,9 @@ In G1, garbage collection overhead comes from three primary sources:
   Although mutator threads are inactive during STW events, they represent potential application work that is delayed. 
   By only counting the threads that could actually run at the same time, we get a more accurate and realistic estimate of how much the application was slowed down. 
 
-  \item \textbf{Concurrent GC threads:} These threads operate in the background,
-  concurrently with application execution. They are responsible for marking live 
-  objects, reclaiming unreachable memory, and performing cleanup tasks such as region 
-  classification. While these threads improve throughput by avoiding long pauses, they 
-  still consume CPU cycles, that are classified as GC overheads.
-
-  To account for compute cycles lost to concurrent GC threads, 
+  \item \textbf{Measuring Concurrent GC threads:} These threads operate in the background,
+  concurrently with application execution. 
+  Hence, in order to account for compute cycles lost to concurrent GC threads, 
   we must determine whether GC activity actually interferes with 
   application (mutator) execution. This interference occurs only when 
   the system is oversubscribed—that is, when the combined number of 
@@ -82,11 +78,8 @@ In G1, garbage collection overhead comes from three primary sources:
   \textit{GC overhead} = GC thread time $-$ time spent on idle cores (if oversubscribed), else $0$
   \end{center}
 
-  \item \textbf{Refinement threads:} G1 uses card tables and remembered sets to track 
-  inter-region references. Refinement threads are responsible for processing these write
-  barriers and maintaining the remembered sets, which are a part of 
-  concurrent collection. 
-  the full runtime of refinement threads is interpreted as GC overhead. This is because refinement thread 
+  \item \textbf{Measuring Refinement threads:} Refinement threads are a part of concurrent collection, 
+  so the full runtime of refinement threads is interpreted as GC overhead. This is because refinement thread 
   activity directly supports concurrent GC phases and typically runs in the background,
   contributing 100\% of their execution time to GC-related compute loss.
 
