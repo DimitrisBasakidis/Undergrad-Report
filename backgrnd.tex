@@ -4,10 +4,10 @@
 \subsection{Page Cache I/O in TeraHeap}
 
 
-TeraHeap extends the JVM by introducing a secondary heap (H2), is a memory-mapped file,
+TeraHeap extends the JVM by introducing a secondary heap (H2) which is a memory-mapped file
 on a storage device, for less frequenlty accessed objects.
-Objects can be marked and then transferred, from G1-Collectors's heap (H1), to the H2 file.
-To access these objects later, the data must first be fetched back through the page cache.
+Objects can be marked and then transferred from the garbage collected heap (H1) to the H2 file.
+For access, the data must first be fetched back through the page cache.
 
 This design causes I/O when data is loaded from or written. Each time an object stored in H2 is
 accessed, the corresponding pages are loaded, in page segments. When the page cache becomes full,

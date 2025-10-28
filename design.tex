@@ -1,9 +1,19 @@
 \section{Design}
 
+\subsection{Overview}
+
+The goal of FlexHeap is to dynamically split DRAM between the primary heap (H1)
+and the page cache used by TeraHeap’s secondary heap (H2), to reduce garbage collection (GC) 
+and I/O overheads. It monitors runtime behavior in short intervals and uses a finite state machine 
+(FSM) to decide when to grow or shrink the main heap. GC and I/O costs are translated into lost CPU time and then
+compared to determine the optimal resizing action. Expansion decisions are scaled based on CPU 
+usage and are bound between limits to prevent overly aggressive or conservative heap growth. Shrink operations are more aggressive, aiming to release memory back to the page cache 
+by reclaiming up to 50\% of the currently free heap regions. This design allows FlexHeap to respond to workload changes and improve system performance dynamically.
+
 \subsection{Interval-Based Measurement Model}
 
 All resizing decisions are made at the end of an interval. An interval is defined as the time between 
-two consecutive young garbage collections (Young GCs) in the G1 collector. These intervals are recurring 
+two consecutive young garbage collections (Young GCs). These intervals are recurring 
 measurement windows in which both the application threads (mutator) and the garbage collector (GC) can perform working tasks.
 
 During an interval, we track runtime metrics including:
@@ -17,40 +27,9 @@ without introducing significant delay or noise. The cumulative behavior across i
 then interpreted by a finite state machine (FSM), which issues grow or shrink 
 actions based on the recorded runtime metrics.
 
-\subsection{Overview}
-
-% The goal of the design is to dynamically divisio the DRAM between the 
-% primary heap (H1) the page-cache for the H2, based on the application's runtime behavior. 
-% This is achieved through a feedback-driven mechanism that monitors performance and makes resizing decisions.
-%
-% At the end of each interval, the system invokes the \texttt{dram\_repartition()} function, which
-% compares the total compute time lost to garbage collection (GC) and I/O operations to the previous interval.
-% Based on the comparison the FSM issues resizing actions in order to reduce the overheads in future intervals.
-
-% The \texttt{dram\_repartition()} function compares these two overheads to determine which source of 
-% pressure is dominant. If GC overhead is higher, more DRAM is allocated to the on-heap region (H1). 
-% If I/O pressure dominates, DRAM is released from H1 to allow more space for page cache and reduce evictions. 
-% To prevent erratic or overly aggressive resizing, decisions are moderated by a finite state machine (FSM) that
-% encodes cooldown periods and threshold conditions. This ensures that resizing actions are taken smoothly and 
-% only when justified by sustained performance changes.
-%
-% In summary, our system continuously monitors runtime behavior, compares GC and I/O overheads at the end of
-% each interval, and uses an FSM-guided policy to repartition DRAM between H1 and H2 in a responsive yet 
-% controlled manner.
-%
-
-
-% In order for FlexHeap to effectively resize 
-% the heap and give the appropriate amount of DRAM to the page 
-% cache, it must accurately detect when performance bottlenecks occur
-% from garbage collection (GC) or I/O. 
-% In this section, we discuss FlexHeap's FSM for resizing actions,
-% describe the different types of GC overhead scenarios and how they 
-% are measured and explain how FlexHeap operates on sampling intervals to collect GC and I/O metrics.
-%
-%
 \subsection{Calculation of GC overheads}
-In G1, garbage collection overhead comes from three primary sources:
+
+In this section we highlight the main sources of Garbage Collection overhead:
 
 \begin{itemize}
   \item \textbf{Measuring Stop-the-world (STW) pauses:} In these events
@@ -74,18 +53,16 @@ In G1, garbage collection overhead comes from three primary sources:
   concurrently with application execution. 
   Hence, in order to account for compute cycles lost to concurrent GC threads, 
   we must determine whether GC activity actually interferes with 
-  application (mutator) execution. This interference occurs only when 
-  the system is oversubscribed. This occurs, when the combined number of 
+  application (mutator) execution. This interference only occurs when the combined number of 
   mutator threads and concurrent GC threads exceeds the number of available 
-  CPU cores, due to context switching. In such cases, concurrent GC threads compete with the application 
+  CPU cores. In such cases, concurrent GC threads compete with the application 
   for CPU time, causing actual slowdown.
 
-  If the system is not oversubscribed meaning that the number of mutator and GC
-  threads together is less or equal than the number of cores, then the concurrent 
+  If the total mutator and GC threads is less or equal than the number of cores, the concurrent 
   GC threads are able to run on otherwise idle CPUs. In this case, we assume that
   CPUs remaining idle do not cause performance loss.
 
-  Even in oversubscribed conditions, we avoid attributing all GC time as overhead.
+  Even under conditions where concurrent GC threads and mutator threads compete for CPU resources we avoid attributing all GC time as overhead.
   We first subtract the amount of time GC threads could have used on idle cores estimated 
   as the number of free cores \texttt{\#cores} $-$ \texttt{\#mutators} $x$ \texttt{interval\_duration} .
   The remaining time is treated as actual interference with the
@@ -98,13 +75,13 @@ In G1, garbage collection overhead comes from three primary sources:
 
 \end{itemize}
 
-To measure garbage collection overhead, our system tracks the cumulative CPU tims spent in each of these three components. 
+To measure garbage collection overhead, our system tracks the cumulative CPU time spent in each of these three components. 
 This data is collected in each interval and used by FlexHeap to determine whether GC-related costs are increasing or decreasing.
 
 \subsection{I/O Monitoring via eBPF Library}
 
 To accurately capture the I/O overhead produced by page‑cache accesses 
-and object transfers in the secondary heap (H2), we used an existing 
+and object transfers in the secondary heap (H2), we used an existing TeraHeap
 eBPF‑based monitoring library. This library runs in kernel space and tracks events such as page faults and read‑and‑write
 operations of mapped regions. Whenever an object accessed in H2 triggers a page‑cache miss or eviction, the library reports the 
 data movement, which we convert into CPU‑equivalent lost cycles. 
@@ -115,7 +92,7 @@ CPU time lost, enabling a direct comparison with GC overheads during each interv
 
 \subsection{Heap resizing Finate State Machine}
 
-After the end of an interval, FlexHeap collects the GC and I/O lost compute cycles and passes them through 
+Upon completion of an interval, FlexHeap collects the GC and I/O lost compute cycles and passes them through 
 a \textit{finite state machine (FSM)}. The FSM serves as a control mechanism 
 that reacts to both GC and I/O overhead percent changes and decides whether to adjust the DRAM allocation 
 between the heap (H1) and the page-cache. The FSM consists of 3 states:
@@ -132,7 +109,7 @@ a GC initiation and whether there is available space for further expansions.
 
 The decision logic follows several key checks:
 \begin{itemize}
-  \item If the total overhead has increased compared to the previous interval, the system
+  \item If the total GC and I/O overhead has increased compared to the previous interval, the system
     compares the relative growth rates of GC and I/O time. If GC overhead increased more than I/O, 
     FlexHeap interprets this as insufficient heap space and issues a \texttt{GROW\_HEAP} action, 
     provided the heap has not reached its maximum capacity. 
@@ -175,7 +152,7 @@ transitions to \texttt{no\_action}.
 At last the FSM supports the \texttt{no\_action} state, which is the default state.
 When the system enters this state, no DRAM resizing actions were performed.
 
-At each interval, FlexHeap evaluates whether the total GC and I/O time (\texttt{gc\_time\_ms + io\_time\_ms}) has
+At each interval, FlexHeap evaluates whether the total GC and I/O time has
 changed. If the change is within a 5\% threshold, it is interpreted 
 as noise or a stable condition and the system remains in the \texttt{no\_action} state.
 
@@ -196,34 +173,22 @@ the system remains in the \texttt{no\_action} state.
  
 \subsection{Heap Resizing Step}
 
-When a grow action is issued, FlexHeap invokes the \texttt{young\_collection\_expand\_amount()} function, 
-which is a vanilla G1 resizing function.
+When an expansion is required, the system calculates, by using the vanilla-G1's resizing step, how much uncommitted
+memory is available. This is the memory that has been reserved by the JVM but not yet used. 
+A scaling factor is computed based on the change in CPU overhead compared to the previous 
+measurement interval. This factor determines the aggressiveness of the heap expansion and 
+is bounded to prevent overly conservative or excessively aggressive resizing. The final 
+resize amount is then clamped within threshold values to ensure it stays within bounds, large enough to make 
+a adjustments, but not to exhaust the remaining memory and create GC pressure.
 
-The method begins by calculating the total amount of uncommitted memory which is the difference
-between the reserved heap size (\texttt{max\_capacity()}) and the currently committed size 
-(\texttt{capacity()}). This value represents the available space for heap expansion.
+In contrast, shrink decisions are more aggressive. Since returning 
+DRAM to the operating system's page cache can significantly reduce I/O delays for TeraHeap
+workloads, shrink operations prioritize releasing unused memory. The amount of memory to shrink 
+is derived from the number of free heap regions—memory that has already been committed but is 
+not actively in use. A fixed scaling factor (50\%), is then applied to determine how much 
+of the free memory can be reclaimed, ensuring that the main heap retains sufficient headroom 
+for sudden bursts of memory allocation without triggering excessive garbage collection.
 
-A scale factor is then computed using a delta cpu usage between the previous intervals and is bounded between two thresholds: \texttt{1.3} 
-(minimum growth) and \texttt{4.2} (maximum growth). These growth values represent a x-axis value to a sigmoid
-function which returns a scaled number based on how aggressive the heap will be expanded.
-
-After scaling, the function clamps the resulting value between two bounds: a minimum threshold of one heap region size 
-(\texttt{HeapRegion::GrainBytes}) and a maximum of the remaining uncommitted memory. 
-The final value is the resize amount that FlexHeap passes onto the G1-Collector to resize its heap.
-
-If a FlexHeap determines a shrink action is needed, the \texttt{young\_collection\_shrink\_amount()} is called, calculating a shrink amount,
-that will be applied to the heap. Unlike the expand function, 
-which dynamically scales based on CPU usage deltas, the shrink amount has a fixed maximum scaling factor, ensuring that the
-shrink actions are more aggressive, in order to provide as much memory to the page-cache at any given moment. 
-This factor is defined by the parameter \texttt{G1ShrinkByPercentOfAvailable}, 
-which defaults to \texttt{50}, resulting in a maximum scale factor of \texttt{0.5}, or 50\% of the free memory regions,
-while also leaving space for sudden allocation bursts.
-
-To calculate the amount of memory to shrink, the function first finds the number of currently free heap 
-regions via \texttt{\_g1h->num\_free\_regions()}. This value represents memory that is already committed but 
-not actively being used. It then multiplies this number by the size of a single heap region (\texttt{HeapRegion::GrainBytes})
-and scales it by the shrink factor. The result is the total number of bytes for a heap shrinkage.
-%
 % % interval is the time frame between 2 young gcs
 % % overview section
 % % how do i measure the gc overheads (CPU time spent on STW and CPU on concurrent and refinmenet threads)

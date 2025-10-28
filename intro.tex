@@ -41,16 +41,17 @@ performance. This behavior highlights the limitations of static partitioning.
 	\label{fig:vanilla-dram-underutilization}
 \end{figure}
 
-To address this limitation, we integrate \textbf{FlexHeap} to our system.
-FlexHeap is a dynamic resizing policy that operates at runtime by
+To address this limitation, we port \textbf{FlexHeap} to our system,
+a dynamic resizing policy that operates at runtime by
 dividing execution into sampling intervals. During each interval, it tracks the
 number of CPU cycles lost to GC (garbage collection) and the I/O overheads including I/O caused by
 accesses to the (H2) memory-mapped file. At the end of each interval, it compares the percent 
 change between the two metrics, relative to the previous intervals. If garbage
 collection overhead has increased more than I/O stalls, FlexHeap signals G1 to grow
-the H1 heap to relieve GC pressure, else if I/O delays have increased,
+the H1 heap to relieve GC pressure. Inversely, if I/O delays have increased,
 a shrink heap action is invoked, shifting the remaining memory towards the pagecache, via cgroups, to reduce evictions and hold 
-more data from the H2 file. Across Lucene's benchmarks,FlexHeap reduces execution time by
-up to 70\%, and lowers GC time and H2 file reads by 28\% and 13\% on average.
+more data from the H2 file. Across Lucene's and Spark's benchmarks, FlexHeap reports execution time improvements
+up to 70\% and 9\% accordingly.
+
 
 

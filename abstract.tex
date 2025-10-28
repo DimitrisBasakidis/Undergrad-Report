@@ -24,23 +24,24 @@
 
 	TeraHeap is a memory management system supporting a dual heap design: the
 	primary heap (H1) in DRAM, and the secondary heap (H2) which is memory-mapped
-	over a storage device and is accessed via the OS page cache. In order to be
-	decided, how much memory goes into H1 and the page-cache for H2, it has to be
-	statically configured, in the beginning of an execution. This leaves the
-	system without adaptability during execution. H1 may need more memory, when
+  over a storage device and is accessed via the OS page cache.
+  The partition of memory between H1 and the page-cache for H2, has to be
+	statically configured at compile time, not enabling system adaptability during execution. 
+  H1 may need more memory, when
 	it cannot get it, GC runs more often and for longer, increasing pause times
 	and delaying the application. Conversely, when the page cache is smaller than
 	it could be, storage traffic rises by increasing I/O wait, page evictions,
 	and the system repeatedly reads from the H2 file.
 
 	In this thesis, we address the DRAM division problem in TeraHeap’s static DRAM
-	split, by integrating  FlexHeap, a dynamic heap resizing mechanism into
-	TeraHeap. FlexHeap is, a resizing policy that monitors at runtime GC and I/O.
+	split, by integrating  FlexHeap, a dynamic heap resizing mechanism.
+	FlexHeap is, a policy that monitors at runtime GC and I/O.
 	Based on these metrics it resizes the Garbage Collector's heap accordingly
 	and assigns the rest of the DRAM budget to the page-cache via cgroups. In our
 	evaluation, we show that FlexHeap improves the execution time of Lucene's
 	benchmarks up to 70\%, while also reducing GC time and H2 file reads on
-	average by 28\% and 13\%.
+	average by 28\% and 13\%. Similarly, it reduces the total runtime in the majority
+  of Spark's benchmarks, by 6\% on average.
 
 
 \end{abstract}
