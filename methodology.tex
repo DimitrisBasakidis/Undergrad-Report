@@ -49,28 +49,47 @@ the dynamic configuration uses the \textbf{FlexHeap} policy, which adjusts the s
 at runtime based on application behavior, while reserving a fixed 2\,GiB of DRAM for the page cache across all runs.
 
 This setup allows us to evaluate the benefits of dynamic heap resizing under different memory constraints and workload pressures. 
-The DRAM configurations are presented in Table~\ref{tab:lucene-configs}.
+The main heap (H1) sizes for different DRAM configurations are presented in Table~\ref{tab:lucene-configs}.
+
+% \begin{table}[H]
+% \centering
+% \renewcommand{\arraystretch}{1.3}
+% \caption{Lucene configurations for workloads M1 and M2 under.}
+% \label{tab:lucene-configs}
+% \begin{tabular}{|l|c|c|}
+% \hline
+% \textbf{Configuration} & \textbf{DRAM Budget} & \textbf{H1 / H2 Allocation (GiB)} \\
+% \hline
+% \multirow{4}{*}{TeraHeap (static)} 
+%                        & 40\,G             & 20\,G / 20\,G \\
+%                        & 20\,G             & 10\,G / 10\,G \\
+%                        & 10\,G             & 5\,G / 5\,G   \\
+%                        & 8\,G              & 4\,G / 4\,G   \\
+% \hline
+% \multirow{4}{*}{FlexHeap (dynamic)} 
+%                        & 40\,G             & 38\,G / 2\,G  \\
+%                        & 20\,G             & 18\,G / 2\,G  \\
+%                        & 10\,G             & 8\,G / 2\,G   \\
+%                        & 8\,G              & 6\,G / 2\,G   \\
+% \hline
+% \end{tabular}
+% \end{table}
+
 \begin{table}[H]
 \centering
-\renewcommand{\arraystretch}{1.3}
-\caption{Lucene configurations for workloads M1 and M2 under.}
+\renewcommand{\arraystretch}{1.1}
+\caption{Lucene H1 size configurations for workloads M1 and M2 under.}
 \label{tab:lucene-configs}
-\begin{tabular}{|l|c|c|}
+\begin{tabular}{|l|c|c|c|c|}
+
 \hline
-\textbf{Configuration} & \textbf{DRAM Budget} & \textbf{H1 / H2 Allocation (GiB)} \\
+  \textbf{DRAM Budget} & 40\,G & 20\,G & 10\,G & 8\,G \\
 \hline
-\multirow{4}{*}{TeraHeap (static)} 
-                       & 40\,G             & 20\,G / 20\,G \\
-                       & 20\,G             & 10\,G / 10\,G \\
-                       & 10\,G             & 5\,G / 5\,G   \\
-                       & 8\,G              & 4\,G / 4\,G   \\
+  TeraHeap (static)& 20\,G & 10\,G & 5\,G & 4\,G \\
 \hline
-\multirow{4}{*}{FlexHeap (dynamic)} 
-                       & 40\,G             & 38\,G / 2\,G  \\
-                       & 20\,G             & 18\,G / 2\,G  \\
-                       & 10\,G             & 8\,G / 2\,G   \\
-                       & 8\,G              & 6\,G / 2\,G   \\
+  FlexHeap (dynamic)& 38\,G & 18\,G  & 8\,G & 6\,G \\
 \hline
+ 
 \end{tabular}
 \end{table}
 
