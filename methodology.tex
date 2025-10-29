@@ -8,7 +8,7 @@ These metrics allow us to assess both runtime performance and DRAM utilization e
 
 Our experiments run on a high-performance dual-socket Intel server.
 The system is equipped with two Intel Xeon Gold 5318Y CPUs, each with 24 physical cores 
-and 2 hardware threads per core, for a total of 96 logical CPUs. It includes 256\,GiB of DRAM 
+and 2 hardware threads per core, for a total of 96 logical CPUs. It includes 256\,G of DRAM 
 distributed across four NUMA nodes, with swap disabled. We co-locate all threads on a single
 NUMA node to eliminate NUMA interference and use Linux cgroups to restrict the available DRAM,
 enabling controlled and memory-constrained experiments.
@@ -46,7 +46,7 @@ For each DRAM setting, we evaluate both the static and a dynamic heap configurat
 The static configuration, \textbf{TeraHeap}, evenly partitions the available DRAM between the 
 managed heap (H1) and the page cache (H2), allocating 50\% of memory to each. In contrast, 
 the dynamic configuration uses the \textbf{FlexHeap} policy, which adjusts the size of H1 
-at runtime based on application behavior, while reserving a fixed 2\,GiB of DRAM for the page cache across all runs.
+at runtime based on application behavior, while reserving a fixed 2\,G of DRAM for the page cache across all runs.
 
 This setup allows us to evaluate the benefits of dynamic heap resizing under different memory constraints and workload pressures. 
 The main heap (H1) sizes for different DRAM configurations are presented in Table~\ref{tab:lucene-configs}.
