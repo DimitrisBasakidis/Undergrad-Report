@@ -8,18 +8,28 @@
 % 	4. write where you implement your solution and provide some high-level results.
 % }
 
+% Widely-used data analytics and search engines such as \textbf{Apache Lucene}
+% \cite{klinaftakis2025thesis} and \textbf{Apache Spark} run over Java virtual
+% machines (JVM). They require large heaps in order to be able to process large
+% datasets. \note{jk: Such systems require to host large compute caches. For
+% 	example, Lucene maintains a query cache to store frequently queries to avoid
+% 	their recomputation. Similarly, Spark maintains on-heap cache to store
+% 	intermediate results to avoid recomputation. However, large-heaps require large
+% 	amount of DRAM but DRAM capacity scalining is limited. Also, large-heaps
+% 	requires expensive GC scans and compactions}.
+
 Widely-used data analytics and search engines such as \textbf{Apache Lucene}
-\cite{klinaftakis2025thesis} and \textbf{Apache Spark} run over Java virtual
-machines (JVM). They require large heaps in order to be able to process large
-datasets. \note{jk: Such systems require to host large compute caches. For
-	example, Lucene maintains a query cache to store frequently queries to avoid
-	their recomputation. Similarly, Spark maintains on-heap cache to store
-	intermediate results to avoid recomputation. However, large-heaps require large
-	amount of DRAM but DRAM capacity scalining is limited. Also, large-heaps
-	requires expensive GC scans and compactions}.
+\cite{klinaftakis2025thesis} and \textbf{Apache Spark} \cite{spark3.3} run over Java Virtual
+Machines (JVM) and rely on large managed heaps. These systems depend heavily on in-memory compute caches
+to reduce redundant computation. For instance, Lucene maintains a query cache to
+store results of frequent queries, while Spark uses on-heap caching to retain
+intermediate computation results across stages. However, supporting such large heaps
+requires substantial DRAM capacity, which is often limited.
+In addition, large heaps significantly increase garbage collection (GC) overhead,
+as they require more frequent and costly GC cycles, including full-heap scans and compaction.
 
 A solution for large heaps that does not add overheads to the GC cost is
-dual-heap designs, such as TeraHeap \note{jk: add citation!!}. TeraHeap extends
+dual-heap designs, such as TeraHeap \cite{teraheap_asplos}. TeraHeap extends
 G1, the default garbage collector of OpenJDK to use two heaps: a primary heap
 (H1) in DRAM and a second high capacity heap (H2) memory-mapped over a fast
 storage device which is acccessed though OS page cache. G1 scans and compacts
@@ -28,8 +38,8 @@ heap and the pagecache must happen at the beginning of an execution statically,
 which presents a problem since the system can not adapt in phases with
 different memory and I/O demands.
 
-\note{say the goal of this paragraph!! then show the figure and explain the results}
-Figure~\ref{fig:vanilla-dram-underutilization} illustrates a native Lucene
+To demonstrate the limitations of static DRAM partitioning,
+figure~\ref{fig:vanilla-dram-underutilization} illustrates a native Lucene
 benchmark using a total of 8GB of DRAM, evenly split between H1 and the OS page
 cache. At the beginning of the run, the heap usage rapidly spikes, indicating
 that an increased number of GC cycles is occurring. As the benchmark execution
@@ -46,11 +56,10 @@ the limitations of static partitioning.
 	\label{fig:vanilla-dram-underutilization}
 \end{figure}
 
-To address this limitation, we port \textbf{FlexHeap} to our system, a dynamic
+To address this limitation, we port \textbf{FlexHeap} \cite{flexheap} to our system, a dynamic
 resizing policy that operates at runtime by dividing execution into sampling
-intervals. During each interval, it tracks the number of CPU time consumed by GC
-\note{jk: first say garbage collection and then defind the accronym. then in the rest of the text use the acronym.}
-(garbage collection) and the I/O overheads including I/O caused by accesses to
+intervals. During each interval, it tracks the number of CPU time consumed by Garbage-Collection (GC)
+and the I/O overheads including I/O caused by accesses to
 the (H2) memory-mapped file. At the end of each interval, it compares the
 percent change between the two metrics, relative to the previous intervals. If
 garbage collection overhead has increased more than I/O stalls, FlexHeap
@@ -59,10 +68,29 @@ have increased, a shrink heap action is invoked, shifting the remaining memory
 towards the pagecache, via cgroups, to reduce evictions and hold more data from
 the H2 file.
 
-\note{jk: write in which version of OpenJDK you have impement FlexHeap. Then
-	discuss the high-level results}Across Lucene's and Spark's benchmarks, FlexHeap
-reports execution time improvements up to 70\% and 9\% accordingly.
+% \note{jk: write in which version of OpenJDK you have impement FlexHeap. Then
+% 	discuss the high-level results}Across Lucene's and Spark's benchmarks, FlexHeap
+% reports execution time improvements up to 70\% and 9\% accordingly.
+%
+% \note{jk: Here write in bullet points the contributions. For example, we show
+% 	the problem of dynamic dram partitioning in tiered managed heaps. A second
+% 	contibution is the implementation of FlexHeap on top of TeraHeap}
 
-\note{jk: Here write in bullet points the contributions. For example, we show
-	the problem of dynamic dram partitioning in tiered managed heaps. A second
-	contibution is the implementation of FlexHeap on top of TeraHeap}
+Across Lucene and Spark benchmarks, FlexHeap achieves 
+execution time improvements of up to 70\% and 9\%, respectively, compared to 
+TeraHeap with static DRAM partitioning. We implement FlexHeap as an extension 
+to OpenJDK 17, extending TeraHeap.
+In this thesis we make the following contributions:
+
+\vspace{0.5em}
+\begin{itemize}
+\item We identify and analyze the limitations of static DRAM partitioning in a tiered managed heap 
+  environment, highlighting how fixed memory allocations can not optimize performance 
+  due to underutilized memory and I/O pressure.
+
+\item We intergate \textbf{FlexHeap}, into G1 TeraHeap \cite{melidonis_thesis, mairh_thesis}
+
+\item We evaluate FlexHeap on real-world Lucene and Spark workloads, showing consistent
+  performance improvements and better DRAM utilization under certain memory budgets.
+
+\end{itemize}

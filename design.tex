@@ -14,17 +14,18 @@ aiming to release memory back to the page cache by reclaiming up to 50\% of the
 currently free heap regions. This design allows FlexHeap to respond to workload
 changes and improve system performance dynamically.
 
-\subsection{Interval-Based Measurement Model}
+% \subsection{Interval-Based Measurement Model}
+\subsection{Estimate the impact of GC cost and I/O stalls}
 
-\note{jk: the title of the subsection should be "Estimate the impact of GC cost and I/O stalls"}
 All resizing decisions are made at the end of an interval. An interval is
-defined as the time between two consecutive young \note{jk: not only young, but
-	mixed or full - actully between two stop-the-world GCs} garbage collections
-(Young GCs). These intervals are recurring measurement windows in which both the
+defined as the time between two consecutive stop-the-world garbage collections
+Young GCs, Mixed GCs or Full GCs). These intervals are recurring measurement windows in which both the
 application threads (mutator) and the garbage collector (GC) can perform
-working tasks. \note{jk: our measurements are not accurate but they are an
-	estimation of the costs. so you need to defind that we estimate the GC cost and
-	I/O cost.}
+working tasks. Within each interval, we estimate the cost of garbage collection and I/O activity,
+to provide sufficient insight into system behavior to guide our dynamic resizing policy.
+% \note{jk: our measurements are not accurate but they are an
+% 	estimation of the costs. so you need to defind that we estimate the GC cost and
+% 	I/O cost.}
 
 During an interval, we track runtime metrics including:
 \begin{itemize}
