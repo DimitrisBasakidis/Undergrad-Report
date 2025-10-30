@@ -1,5 +1,7 @@
 \section{Design}
 
+% eliminate bullets, make as paragraph
+
 \subsection{Overview}
 
 The goal of FlexHeap is to dynamically split DRAM between the primary heap (H1)
@@ -15,7 +17,7 @@ currently free heap regions. This design allows FlexHeap to respond to workload
 changes and improve system performance dynamically.
 
 % \subsection{Interval-Based Measurement Model}
-\subsection{Estimate the impact of GC cost and I/O stalls}
+\subsection{Estimating the impact of GC cost and I/O stalls}
 
 All resizing decisions are made at the end of an interval. An interval is
 defined as the time between two consecutive stop-the-world garbage collections
@@ -32,55 +34,89 @@ During an interval, we track runtime metrics including:
 	\item The total CPU time lost due to GC, including stop-the-world pauses, concurrent GC threads, and refinement threads.
 	\item The I/O overhead introduced by page cache while perfoming accesses to TeraHeap's secondary heap (H2).
 \end{itemize}
+	
+\paragraph{Measuring STW pauses:} In these events
+all application threads (mutators) are paused so that the JVM can exclusively perform
+GC-related work. In order to calculate the time overheads produced by G1’s stop-the-world (STW) phases,
+we measure the time spent inside key G1 safepoint functions.
+Specifically we place timers around safepoint phases of the G1 garbage collector.
+These include the stop-the-world pause for young and mixed collections, the concurrent
+marking phase where the reachability of live objects is finalized and the full GC path
+that reclaims the entire heap when necessary.
 
-\begin{itemize}
-	\item \textbf{Measuring Stop-the-world (STW) pauses:} In these events
-	      all application threads (mutators) are paused so that the JVM can exclusively perform
-	      GC-related work. In order to calculate the time overheads produced by G1’s stop-the-world (STW) phases,
-	      we measure the time spent inside key G1 safepoint functions.
-	      Specifically we place timers around safepoint phases of the G1 garbage collector.
-	      These include the stop-the-world pause for young and mixed collections, the concurrent
-	      marking phase where the reachability of live objects is finalized and the full GC path
-	      that reclaims the entire heap when necessary.
+\paragraph{Measuring Concurrent GC threads:} These threads operate in the background,
+concurrently with application execution.
+Hence, in order to account for compute cycles lost to concurrent GC threads,
+we must determine whether GC activity actually interferes with
+application (mutator) execution. This interference only occurs when the combined number of
+mutator threads and concurrent GC threads exceeds the number of available
+CPU cores. In such cases, concurrent GC threads compete with the application
+for CPU time, causing actual slowdown.
 
-	      After obtaining the time spent in the safepoint functions, we translate it into CPU overhead, by using the following formula:
-	      \[
-		      \text{cpu\_time\_spent} += \text{gc\_pause\_time} \times \min(\text{mutators}, \text{cores})
-	      \]
-	      This formula estimates CPU cycles lost due to GC pauses by considering both the duration of the pauses and the level of available parallelism.
-	      Although mutator threads are inactive during STW events, they represent potential application work that is delayed.
-	      By only counting the threads that could actually run at the same time, we get a more accurate and realistic estimate of how much the application was slowed down.
+If the total mutator and GC threads is less or equal than the number of cores, the concurrent
+GC threads are able to run on otherwise idle CPUs. In this case, we assume that
+CPUs remaining idle do not cause performance loss.
 
-	\item \textbf{Measuring Concurrent GC threads:} These threads operate in the background,
-	      concurrently with application execution.
-	      Hence, in order to account for compute cycles lost to concurrent GC threads,
-	      we must determine whether GC activity actually interferes with
-	      application (mutator) execution. This interference only occurs when the combined number of
-	      mutator threads and concurrent GC threads exceeds the number of available
-	      CPU cores. In such cases, concurrent GC threads compete with the application
-	      for CPU time, causing actual slowdown.
+Even under conditions where concurrent GC threads and mutator threads compete for CPU resources we avoid attributing all GC time as overhead.
+We first subtract the amount of time GC threads could have used on idle cores estimated
+as the number of free cores \texttt{\#cores} $-$ \texttt{\#mutators} $x$ \texttt{interval\_duration} .
+The remaining time is treated as actual interference with the
+application and is counted as GC overhead.
 
-	      If the total mutator and GC threads is less or equal than the number of cores, the concurrent
-	      GC threads are able to run on otherwise idle CPUs. In this case, we assume that
-	      CPUs remaining idle do not cause performance loss.
+\paragraph{Measuring Refinement threads:} Refinement threads are a part of concurrent collection,
+so the full runtime of refinement threads is interpreted as GC overhead. This is because refinement thread
+activity directly supports concurrent GC phases and typically runs in the background,
+contributing 100\% of their execution time to GC-related compute loss.
 
-	      Even under conditions where concurrent GC threads and mutator threads compete for CPU resources we avoid attributing all GC time as overhead.
-	      We first subtract the amount of time GC threads could have used on idle cores estimated
-	      as the number of free cores \texttt{\#cores} $-$ \texttt{\#mutators} $x$ \texttt{interval\_duration} .
-	      The remaining time is treated as actual interference with the
-	      application and is counted as GC overhead.
 
-	\item \textbf{Measuring Refinement threads:} Refinement threads are a part of concurrent collection,
-	      so the full runtime of refinement threads is interpreted as GC overhead. This is because refinement thread
-	      activity directly supports concurrent GC phases and typically runs in the background,
-	      contributing 100\% of their execution time to GC-related compute loss.
-
-\end{itemize}
+% \begin{itemize}
+% 	\item \textbf{Measuring Stop-the-world (STW) pauses:} In these events
+% 	      all application threads (mutators) are paused so that the JVM can exclusively perform
+% 	      GC-related work. In order to calculate the time overheads produced by G1’s stop-the-world (STW) phases,
+% 	      we measure the time spent inside key G1 safepoint functions.
+% 	      Specifically we place timers around safepoint phases of the G1 garbage collector.
+% 	      These include the stop-the-world pause for young and mixed collections, the concurrent
+% 	      marking phase where the reachability of live objects is finalized and the full GC path
+% 	      that reclaims the entire heap when necessary.
+%
+% 	      After obtaining the time spent in the safepoint functions, we translate it into CPU overhead, by using the following formula:
+% 	      \[
+% 		      \text{cpu\_time\_spent} += \text{gc\_pause\_time} \times \min(\text{mutators}, \text{cores})
+% 	      \]
+% 	      This formula estimates CPU cycles lost due to GC pauses by considering both the duration of the pauses and the level of available parallelism.
+% 	      Although mutator threads are inactive during STW events, they represent potential application work that is delayed.
+% 	      By only counting the threads that could actually run at the same time, we get a more accurate and realistic estimate of how much the application was slowed down.
+%
+% 	\item \textbf{Measuring Concurrent GC threads:} These threads operate in the background,
+% 	      concurrently with application execution.
+% 	      Hence, in order to account for compute cycles lost to concurrent GC threads,
+% 	      we must determine whether GC activity actually interferes with
+% 	      application (mutator) execution. This interference only occurs when the combined number of
+% 	      mutator threads and concurrent GC threads exceeds the number of available
+% 	      CPU cores. In such cases, concurrent GC threads compete with the application
+% 	      for CPU time, causing actual slowdown.
+%
+% 	      If the total mutator and GC threads is less or equal than the number of cores, the concurrent
+% 	      GC threads are able to run on otherwise idle CPUs. In this case, we assume that
+% 	      CPUs remaining idle do not cause performance loss.
+%
+% 	      Even under conditions where concurrent GC threads and mutator threads compete for CPU resources we avoid attributing all GC time as overhead.
+% 	      We first subtract the amount of time GC threads could have used on idle cores estimated
+% 	      as the number of free cores \texttt{\#cores} $-$ \texttt{\#mutators} $x$ \texttt{interval\_duration} .
+% 	      The remaining time is treated as actual interference with the
+% 	      application and is counted as GC overhead.
+%
+% 	\item \textbf{Measuring Refinement threads:} Refinement threads are a part of concurrent collection,
+% 	      so the full runtime of refinement threads is interpreted as GC overhead. This is because refinement thread
+% 	      activity directly supports concurrent GC phases and typically runs in the background,
+% 	      contributing 100\% of their execution time to GC-related compute loss.
+%
+% \end{itemize}
 
 To measure garbage collection overhead, our system tracks the cumulative CPU time spent in each of these three components.
 This data is collected in each interval and used by FlexHeap to determine whether GC-related costs are increasing or decreasing.
 
-\subsection{I/O Monitoring via eBPF Library}
+\subsubsection{I/O Monitoring via eBPF Library}  % make sub sub section
 
 To accurately capture the I/O overhead produced by page‑cache accesses and
 object transfers in the secondary heap (H2), we used an existing TeraHeap
@@ -92,7 +128,7 @@ cycles. By integrating this eBPF library, I/O stalls can be translated into
 equivalent CPU time lost, enabling a direct comparison with GC overheads during
 each interval.
 
-\subsection{Heap resizing Finate State Machine}
+\subsection{Heap resizing decision making} % rename to somethging like decision making, or dram division...
 
 Upon completion of an interval, FlexHeap collects the GC and I/O lost compute cycles and passes them through
 a \textit{finite state machine (FSM)}. The FSM serves as a control mechanism
@@ -196,10 +232,4 @@ has already been committed but is not actively in use. A fixed scaling factor
 (50\%), is then applied to determine how much of the free memory can be
 reclaimed, ensuring that the main heap retains sufficient headroom for sudden
 bursts of memory allocation without triggering excessive garbage collection.
-
-% % interval is the time frame between 2 young gcs
-% % overview section
-% % how do i measure the gc overheads (CPU time spent on STW and CPU on concurrent and refinmenet threads)
-% % how do we measure I/O
-% % applying the smae resizing step as vanila g1 with different thresholds
 

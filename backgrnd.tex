@@ -1,41 +1,66 @@
 \section{Background}
 
-\note{jk: Your background should discuss the GC types of G1 (young, mixed, full
-	GCs), when objects are moved from H1 to H2}
+% \note{jk: Your background should discuss the GC types of G1 (young, mixed, full
+% 	GCs), when objects are moved from H1 to H2}
+%
+%
+% \subsection{TeraHeap} % delete 
+% TeraHeap extends the JVM's Garbage-Collector (G1) by introducing a
+% secondary heap (H2) which is a memory-mapped file on a storage device. TeraHeap
+% provides a hint-based interface, where applications can mark which objects to
+% move to H2. In the next mixed or full GC cycle, TeraHeap transfers the
+% transitive closure of the marked objects from H1 to the H2. All the accesses to
+% H2 objects go through the OS page cache.
 
+\subsection{GC Types in G1-Garbage Collector} 
 
-\subsection{TeraHeap}
-TeraHeap extends the JVM's Garbage-Collector (G1) by introducing a
-secondary heap (H2) which is a memory-mapped file on a storage device. TeraHeap
-provides a hint-based interface, where applications can mark which objects to
-move to H2. In the next mixed or full GC cycle, TeraHeap transfers the
-transitive closure of the marked objects from H1 to the H2. All the accesses to
-H2 objects go through the OS page cache.
+\textbf{1. Stop-the-World (STW) Garbage Collection:} G1 executes several garbage collection 
+phases in stop-the-world mode, during which all mutator (application) threads are paused to 
+ensure heap consistency. These phases include Young GC, Mixed GC, and Full GC. Young GC 
+collects recently allocated objects in the Eden space and promotes survivors to the old 
+generation. Mixed GC targets both young and selected old regions, allowing more aggressive 
+memory reclamation, while Full GC is a global collection that occurs when incremental 
+mechanisms fail to free sufficient space. Although Young GCs are typically short, Mixed and 
+Full GCs can cause significantly longer pauses. All of these operations take place at safepoint 
+functions, resulting in application execution being blocked, introducing latency spikes.
 
-\subsection{GC Types in G1-Garbage Collector} In the G1 garbage collector, GC
-overheads occur from 3 key mechanisms that operate either at safepoints or
-concurrently with the application. These contributors to GC-related CPU
-overhead are:
+\textbf{2. Concurrent Garbage Collection Activity:} To reduce pause times, 
+G1 offloads parts of the garbage collection process to concurrent threads 
+that run in parallel with the application. These include concurrent marking 
+cycles, which traverses the old generation to identify live objects, and 
+refinement threads, which update remembered sets by processing write barriers and card tables. 
+Although these threads do not suspend mutator execution, they still consume CPU cycles. When 
+the total number of GC and mutator threads exceeds the available cores, contention and context 
+switching can occur, leading to performance degradation. Thus, while concurrent phases are non-blocking, 
+they can still impact the application.
 
-\textbf{1. Stop-the-World (STW) Pauses:}  G1 performs certain tasks such as
-root scanning, object copying, or final marking and heap related operations
-like young generation collections, mixed collections and full GCs. Such phases
-are exeuted in safepoints where all application (mutator) threads are
-suspended. These are called \emph{stop-the-world} events and directly block
-application execution resulting in major latency spikes.
+% In the G1 garbage collector, GCf
+% overheads occur from 3 key mechanisms that operate either at safepoints or
+% concurrently with the application. These contributors to GC-related CPU
+% overhead are:
+%
+% \textbf{1. Stop-the-World (STW) Pauses:}  G1 performs certain tasks such as
+% root scanning, object copying, or final marking and heap related operations % stw gc analyze
+% like young generation collections, mixed collections and full GCs. Such phases
+% are exeuted in safepoints where all application (mutator) threads are
+% suspended. These are called \emph{stop-the-world} events and directly block
+% application execution resulting in major latency spikes.
+%
+%
+% % 2. conc gc 
+% \textbf{2. Concurrent GC Threads:}  To reduce pause times, G1 assigns specific
+% GC work to dedicated concurrent threads that run alongside the executors. These
+% threads are responsible for concurrent markings. While these operations are
+% designed to be background activities, they still consume CPU cycles, due to
+% context switches. Also, if the number of GC threads plus mutator threads
+% exceeds the available CPU cores, they compete for CPU time, leading to
+% potential application slowdowns due to oversubscription.
+%
+% \textbf{3. Refinement Threads:}  G1 uses a card table and remembered sets to % not a gc type, add to concurrent gc 
+% track cross-region references. Refinement threads are responsible for updating
+% these remembered sets with references to objects existing in the old
+% generation. This mechanism ensures correctness during evacuation but introduces
+% additional CPU overhead, especially under write-heavy workloads.
 
-\textbf{2. Concurrent GC Threads:}  To reduce pause times, G1 assigns specific
-GC work to dedicated concurrent threads that run alongside the executors. These
-threads are responsible for concurrent markings. While these operations are
-designed to be background activities, they still consume CPU cycles, due to
-context switches. Also, if the number of GC threads plus mutator threads
-exceeds the available CPU cores, they compete for CPU time, leading to
-potential application slowdowns due to oversubscription.
-
-\textbf{3. Refinement Threads:}  G1 uses a card table and remembered sets to
-track cross-region references. Refinement threads are responsible for updating
-these remembered sets with references to objects existing in the old
-generation. This mechanism ensures correctness during evacuation but introduces
-additional CPU overhead, especially under write-heavy workloads.
-
+% explain waht happens in young gc, full gc, mixed gc, concurrent mark cycle, refinement threads
 
