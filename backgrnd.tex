@@ -1,47 +1,41 @@
 \section{Background}
 
+\note{jk: Your background should discuss the GC types of G1 (young, mixed, full
+	GCs), when objects are moved from H1 to H2}
 
-\subsection{Page Cache I/O in TeraHeap}
 
+\subsection{TeraHeap}
+TeraHeap extends the JVM \note{jk: or G1?? be concrete} by introducing a
+secondary heap (H2) which is a memory-mapped file on a storage device. TeraHeap
+provides a hint-based interface, where applications can mark which objects to
+move to H2. In the next mixed or full \gc{} cycle, TeraHeap transfers the
+transitive closure of the marked objects from H1 to the H2. All the accesses to
+H2 objects go through the OS page cache.
 
-TeraHeap extends the JVM by introducing a secondary heap (H2) which is a memory-mapped file
-on a storage device, for less frequenlty accessed objects.
-Objects can be marked and then transferred from the garbage collected heap (H1) to the H2 file.
-For access, the data must first be fetched back through the page cache.
+\subsection{GC Types in G1-Garbage Collector} In the G1 garbage collector, GC
+overheads occur from 3 key mechanisms that operate either at safepoints or
+concurrently with the application. These contributors to GC-related CPU
+overhead are:
 
-This design causes I/O when data is loaded from or written. Each time an object stored in H2 is
-accessed, the corresponding pages are loaded, in page segments. When the page cache becomes full,
-these loads trigger evictions of previously existing pages, which in turn
-generate read and write operations to the H2 file. Also when the data size 
-brought into the page-cache exceeds the available capacity, repeated evictions
-and reloads occur, producing increasead I/O. This behavior constitutes the
-primary source of I/O overhead in TeraHeap.
+\textbf{1. Stop-the-World (STW) Pauses:}  G1 performs certain tasks such as
+root scanning, object copying, or final marking and heap related operations
+like young generation collections, mixed collections and full GCs. Such phases
+are exeuted in safepoints where all application (mutator) threads are
+suspended. These are called \emph{stop-the-world} events and directly block
+application execution resulting in major latency spikes.
 
-Although additional I/O operations such as log writing, file reads, print/debug
-outputs may also occur during the execution of applications, they are typically
-considered secondary and contribute much less to overall system I/O.
+\textbf{2. Concurrent GC Threads:}  To reduce pause times, G1 assigns specific
+GC work to dedicated concurrent threads that run alongside the executors. These
+threads are responsible for concurrent markings. While these operations are
+designed to be background activities, they still consume CPU cycles, due to
+context switches. Also, if the number of GC threads plus mutator threads
+exceeds the available CPU cores, they compete for CPU time, leading to
+potential application slowdowns due to oversubscription.
 
-\subsection{GC Types in G1-Garbage Collector}
-In the G1 garbage collector, GC overheads occur from 3 key
-mechanisms that operate either at safepoints or concurrently with the application.
-These contributors to GC-related CPU overhead are:
-
-\textbf{1. Stop-the-World (STW) Pauses:}  
-G1 performs certain tasks such as root scanning, object copying, or final marking and heap related operations
-like young generation collections, mixed collections and full GCs. Such phases are exeuted in safepoints
-where all application (mutator) threads are suspended. These are called \emph{stop-the-world} events and
-directly block application execution resulting in major latency spikes.
-
-\textbf{2. Concurrent GC Threads:}  
-To reduce pause times, G1 assigns specific GC work to dedicated concurrent threads that run 
-alongside the executors. These threads are responsible for concurrent markings.
-While these operations are designed to be background activities,
-they still consume CPU cycles, due to context switches. Also, if the number of GC threads plus mutator threads exceeds the available 
-CPU cores, they compete for CPU time, leading to potential application slowdowns due to oversubscription.
-
-\textbf{3. Refinement Threads:}  
-G1 uses a card table and remembered sets to track cross-region references. Refinement threads 
-are responsible for updating these remembered sets with references to objects existing in the old generation. 
-This mechanism ensures correctness during evacuation but introduces additional CPU overhead, especially under write-heavy workloads.
+\textbf{3. Refinement Threads:}  G1 uses a card table and remembered sets to
+track cross-region references. Refinement threads are responsible for updating
+these remembered sets with references to objects existing in the old
+generation. This mechanism ensures correctness during evacuation but introduces
+additional CPU overhead, especially under write-heavy workloads.
 
 
