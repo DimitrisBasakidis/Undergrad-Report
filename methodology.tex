@@ -110,16 +110,15 @@ The total DRAM budget is workload-specific and chosen for each benchmark.
 The heap allocations for both TeraHeap and FlexHeap configurations are summarized in Table~\ref{tab:spark-benchmark-configs}.
 This setup enables us to evaluate how static versus dynamic DRAM partitioning impacts performance across different Spark tasks.
 
-
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \small
-\renewcommand{\arraystretch}{1}
+\renewcommand{\arraystretch}{0.8}
 \caption{Spark benchmark configurations under TeraHeap (static) and FlexHeap (dynamic).}
 \label{tab:spark-benchmark-configs}
 \begin{tabular}{|l|l|c|}
 \hline
-\textbf{Configuration} & \textbf{Benchmark} & \textbf{H1/ H2 Allocation (G)} \\
+\textbf{Configuration} & \textbf{Benchmark} & \textbf{H1/page-cache (G)} \\
 \hline
 \multirow{7}{*}{TeraHeap (static)} 
 & PageRank             & 64\,G / 16\,G \\
@@ -142,6 +141,48 @@ This setup enables us to evaluate how static versus dynamic DRAM partitioning im
 \end{tabular}
 \end{table}
 
+\vspace{1em} % Or \FloatBarrier if needed
+%
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.95\linewidth]{fig/M2_exec.png}
+%   \caption{Normalized execution time breakdown for M2 workload.}
+%   \label{fig:m2-exec}
+% \end{figure}
+
+% \begin{table}[H]
+% \begin{table}[htbp]
+% \vspace{1em}
+% \centering
+% \small
+% \renewcommand{\arraystretch}{0.8}
+% \caption{Spark benchmark configurations under TeraHeap (static) and FlexHeap (dynamic).}
+% \label{tab:spark-benchmark-configs}
+% \begin{tabular}{|l|l|c|}
+% \hline
+% \textbf{Configuration} & \textbf{Benchmark} & \textbf{H1/ H2 Allocation (G)} \\
+% \hline
+% \multirow{7}{*}{TeraHeap (static)} 
+% & PageRank             & 64\,G / 16\,G \\
+% & ConnectedComponent   & 68\,G / 16\,G \\
+% & ShortestPaths        & 42\,G / 16\,G \\
+% & TriangleCount        & 64\,G / 16\,G \\
+% & SVDPlusPlus          & 24\,G / 16\,G \\
+% & LinearRegression     & 54\,G / 16\,G \\
+% & LogisticRegression   & 54\,G / 16\,G \\
+% \hline
+% \multirow{7}{*}{FlexHeap (dynamic)} 
+% & PageRank             & 74\,G / 6\,G  \\
+% & ConnectedComponent   & 80\,G / 4\,G  \\
+% & ShortestPaths        & 50\,G / 8\,G \\
+% & TriangleCount        & 64\,G / 16\,G \\
+% & SVDPlusPlus          & 28\,G / 12\,G \\
+% & LinearRegression     & 64\,G / 6\,G  \\
+% & LogisticRegression   & 60\,G / 10\,G \\
+% \hline
+% \end{tabular}
+% \end{table}
+%
 %
 % \begin{table*}[!t]
 % % \begin{table}[!htbp]

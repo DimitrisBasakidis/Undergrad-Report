@@ -22,16 +22,7 @@
 
 	% corrected
 
-	% TeraHeap is a memory management system supporting a dual heap design: the
-	% primary heap (H1) in DRAM, and the secondary heap (H2) which is memory-mapped
-	% over a storage device and is accessed via the OS page cache. The partition of
-	% memory between H1 and the page-cache for H2, is statically configured at
-	% the start of an execution, not enabling system % add problem statement 
-	% adaptability during execution. When H1 requires more memory and cannot get
-	% it, GC runs more often and for longer, increasing pause times and delaying
-	% the application. Conversely, when the page cache is smaller than it
-	% could be, storage traffic rises by increasing I/O wait, page evictions, and
-	% the system repeatedly reads from the H2 file.
+
   TeraHeap is a memory management system supporting a dual heap design: the primary heap
   (H1), which resides in DRAM, and the secondary heap (H2), which is memory-mapped over 
   a storage device and accessed via the OS page cache. The memory partitioning
@@ -49,8 +40,8 @@
   and adjusts the size of the H1 heap accordingly, assigning the remaining memory 
   to the page cache used for H2 accesses. In our evaluation,
 	we show that FlexHeap improves the execution time of Lucene's benchmarks up
-	to 70\%, while also reducing GC time and H2 file reads on average by 28\% and
-	13\%. Similarly, it reduces the total runtime in the majority of Spark's
+	to 70\%, while also reducing GC time and H2 file reads on average by over 35\% and
+	55\%. Similarly, it reduces the total runtime in the majority of Spark's
 	benchmarks, by 6\% on average.
 
 

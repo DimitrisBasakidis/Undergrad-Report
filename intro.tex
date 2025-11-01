@@ -45,7 +45,8 @@ risks underutilizing available DRAM and suffering from either excessive GC overh
 
 To demonstrate the limitations of static DRAM partitioning, Figure~\ref{fig:lucene_m1} presents two Lucene 
 M1 benchmark runs, each constrained to a total DRAM budget of 8\,G. The page cache is shown as a red line, 
-the heap capacity as a purple line, and the used heap as a blue line. The left-hand side illustrates a static
+and the used heap as a blue line. For the static graph, we used a purple line for the commited heap memory,
+to highlight, the limited range of the used capacity. The left-hand side illustrates a static
 configuration with a 4\,G heap (H1) and a 4\,G page cache. Early in the run, the heap usage spikes, triggering 
 frequent GC cycles. Over time, heap usage stabilizes at a lower level, suggesting that a portion of the DRAM could 
 have been reallocated to the page cache without heavily impacting GC behavior.
