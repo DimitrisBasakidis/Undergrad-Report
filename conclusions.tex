@@ -1,1 +1,13 @@
 \section{Conclusions}
+
+
+This thesis addresses the limitations of static DRAM partitioning in tiered memory systems. We used TeraHeap, 
+where memory is be divided between the main heap (H1) and the operating system’s page cache for 
+accessing the secondary heap (H2) stored on a fast storage device. To overcome these limitations, we intergate 
+FlexHeap, a dynamic resizing policy that continuously adjusts the DRAM partition between the main heap and 
+the page cache at runtime. FlexHeap monitors and compares garbage collection (GC) CPU time and I/O time across 
+execution intervals to assess the current system balance. Based on this analysis, it decides whether to shrink or 
+grow the primary heap.
+FlexHeap reports execution time speedups in Lucene’s benchmarks up to 70\%, 
+while also reducing GC time by over 35\% and H2 file reads on average by 55\%.
+For Spark, it improves the execution times in 5 out of 7 benchmarks and reduces I/O traffic in 6 out of 7 cases. 

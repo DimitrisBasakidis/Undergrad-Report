@@ -4,12 +4,11 @@
 
 We begin by quantifying the performance impact of static and dynamic DRAM partitioning under varying budgets. 
 For both the M1 and M2 workloads, we collect metrics including total execution time, 
-young GC time, mixed GC time. These metrics highlight how each configuration 
-responds to increasing memory pressure.
+young GC time, mixed GC time.
 
 Figures~\ref{fig:m1-exec} and~\ref{fig:m2-exec} summarize the normalized execution time breakdown for both workloads.
-Each DRAM setting is shown as a pair of bars: the left bar corresponds to the static TeraHeap (TH) configuration, 
-and the right to the dynamic FlexHeap (FH).
+Each DRAM setting is shown as a pair of bars: the left bar corresponds to the static TeraHeap~(TH) configuration, 
+and the right to the dynamic FlexHeap~(FH).
 
 Each bar is split into three regions: 
 light gray indicates non-GC execution time, 
@@ -30,24 +29,33 @@ and orange captures mixed GC time.
   \label{fig:m2-exec}
 \end{figure}
 
-In both benchmarks, FlexHeap consistently outperforms TeraHeap, particularly under smaller memory budgets.  
-For M1, FlexHeap achieves execution time reductions of 10.4\%, 5.9\%, 6.7\% and 70\% at 40\,G, 20\,G, 10\,G and 8\,G DRAM.
+% In both benchmarks, FlexHeap's dynamic partitioning consistently outperforms the static used by TeraHeap, particularly under smaller memory budgets.  
+% For M1, FlexHeap achieves execution time reductions of 10.4\%, 5.9\%, 6.7\% and 70\% at 40\,Gb, 20\,G, 10\,Gb and 8\,Gb DRAM.
+
+
+In both benchmarks, FlexHeap's dynamic partitioning consistently outperforms the static used by TeraHeap, particularly under smaller memory budgets.  
+In M1's benchmarks, for the 3 largest DRAM configurations we observe an average speedup of 7.6\%. An outlier is the 8\,Gb DRAM configuration
+where we notice a speedup of 70\%. As discussed earlier in Section~\ref{sec:intro}, due to contrained H1 DRAM budget, the static partitioning configuration 
+fails to allocate sufficient space to the young generation, resulting in up to 8$\times$ higher time 
+spent in young GC collection. 
+
 M2 also benefits from FlexHeap, with execution times reduced 
-by 4.7\% at 40\,G, 3.5\% at 20\,G, 2.9\% at 10\,G, and 25.4\% at 8\,G. 
+by 4.7\%, 3.5\%, 2.9\%, and 25.4\% at 40\,Gb, 20\,Gb, 10\,Gb and 8\,Gb accordingly. 
+
 
 FlexHeap also reduces read traffic on the H2 file device.
 As shown in Table~\ref{tab:m1-traffic}, FlexHeap lowers read traffic for M1 by 93.6\%, 
-91.1\%, and 65.7\% at 20\,G, 10\,G, and 8\,G DRAM, respectively. At 40\,G DRAM, read traffic increases 
-by 117.4\%, with also slightly higher GC time but, still reports faster execution due to better tail 
-latency (99th percentile latency improves from 1350\,ms to 1327\,ms) and reports higher throughput (Queries Per Second).
+91.1\%, and 65.7\% at 20\,Gb, 10\,Gb, and 8\,Gb DRAM, respectively. At 40\,Gb DRAM, read traffic increases 
+by 117.4\% but, still reports faster execution due to better tail 
+latency (99th percentile latency improves from 1350\,ms to 1327\,ms) and higher throughput (Queries Per Second).
 
-For M2, as presented in Table~\ref{tab:m2-traffic}, FlexHeap reduces read traffic consistently across all DRAM configurations by 57.0\% at 40\,G, 
-92.2\% at 20\,G, 88.9\% at 10\,G, and 71.5\% at 8\,G while also improving GC and execution time with better latency and higher QPS. 
+For M2, as presented in Table~\ref{tab:m2-traffic}, FlexHeap reduces read traffic consistently across all DRAM configurations by 57.0\% at 40\,Gb, 
+92.2\% at 20\,Gb, 88.9\% at 10\,G, and 71.5\% at 8\,Gb while also improving GC and execution time with better latency and higher QPS. 
 
 
 \begin{table}[h]
 \centering
-\caption{Read Traffic on H2 file device for M1 workload (in G)}
+\caption{Read Traffic on H2 file device for M1 workload (in Gb)}
 \label{tab:m1-traffic}
 \begin{tabular}{|c|cc|c|}
 \hline
@@ -59,13 +67,13 @@ For M2, as presented in Table~\ref{tab:m2-traffic}, FlexHeap reduces read traffi
 % 10G & 287,303 & 25,653 & 108,43 & 109,018 \\
 % 8G  & 249,536 & 85,598 & 115,64 & 107,125 \\
 
-\textbf{DRAM} & \multicolumn{2}{c|}{\textbf{Read Traffic(G)}} & \textbf{Reduction} \\
+\textbf{DRAM} & \multicolumn{2}{c|}{\textbf{Read Traffic (Gb)}} & \textbf{Reduction} \\
 \textbf{Budget} & TH & FH & \textbf(\%)\\
 \hline
-40G & 0,938 & 2,039 & 117,38 \\
-20G & 44,823 & 2,854 & -93,63 \\
-10G & 287,303 & 25,653 & -91,07 \\
-8G  & 249,536 & 85,598 & 65,7 \\
+40Gb & 0,938 & 2,039 & +117,38 \\
+20Gb & 44,823 & 2,854 & -93,63 \\
+10Gb & 287,303 & 25,653 & -91,07 \\
+8Gb  & 249,536 & 85,598 & -65,7 \\
 \hline
 \end{tabular}
 \end{table}
@@ -88,17 +96,17 @@ For M2, as presented in Table~\ref{tab:m2-traffic}, FlexHeap reduces read traffi
 
 \begin{table}[h]
 \centering
-\caption{Read Traffic on H2 file device for M2 workload (in G)}
+\caption{Read Traffic on H2 file device for M2 workload (in Gb)}
 \label{tab:m2-traffic}
 \begin{tabular}{|c|cc|c|}
 \hline
-\textbf{DRAM} & \multicolumn{2}{c|}{\textbf{Read Traffic(G)}} & \textbf{Reduction} \\
+\textbf{DRAM} & \multicolumn{2}{c|}{\textbf{Read Traffic (Gb)}} & \textbf{Reduction} \\
 \textbf{Budget} & TH & FH & \textbf(\%)\\
 \hline
-40G & 0,679 & 0,292 & -57 \\ 
-20G & 11,402 & 0,895 & -92 \\
-10G & 109,527 & 12,18 & -89 \\
-8G  & 50,936 & 14,538 & -71 \\
+40Gb & 0,679 & 0,292 & -57 \\ 
+20Gb & 11,402 & 0,895 & -92 \\
+10Gb & 109,527 & 12,18 & -89 \\
+8Gb  & 50,936 & 14,538 & -71 \\
 \hline
 \end{tabular}
 \end{table}
@@ -124,11 +132,11 @@ For M2, as presented in Table~\ref{tab:m2-traffic}, FlexHeap reduces read traffi
 
 
 Figure~\ref{fig:m2-iow-cpu} provides a visual breakdown of the M2 workload execution under an
-8\,G DRAM budget for both TeraHeap and FlexHeap. The top-left subplot shows the TeraHeap run with static DRAM division, 
-while the top-right depicts the FlexHeap run. Below each of these, the corresponding I/O wait timelines are shown.
+8\,Gb DRAM budget for both TeraHeap and FlexHeap. The Figure~\ref{fig:m2-th} subplot shows the TeraHeap run with static DRAM division, 
+while \ref{fig:m2-fh} demonstrates the FlexHeap run. Figures~\ref{fig:m2-th-iow} \ref{fig:m2-fh-iow} show the corresponding I/O wait timelines accordingly.
 
 The red line represents the DRAM allocated to the OS page cache, the blue line shows the
-amount of used heap (H1) and in the case of TeraHeap, a flat purple line indicates the fixed heap capacity at 4\,GB. 
+amount of used heap (H1) and in the case of TeraHeap, a flat purple line indicates the fixed heap capacity at 4\,Gb. 
 This unchanging purple line in the TeraHeap plot visually confirms that no heap resizing takes place during the run. 
 
 In the TeraHeap case, in the beginning we observe high GC activity suggesting the that the heap 
@@ -149,22 +157,54 @@ As the benchmark continues, the used heap remains low, suggesting that the page-
 benefit from shrink actions in order to utilize the unused memory. This is evident as the iowait
 remains low throughout, compared to the TeraHeap run.
 
-
 \begin{figure}[htbp]
   \centering
-  \begin{tabular}{cc}
-    \includegraphics[width=0.48\linewidth]{fig/eval/M2_8DRAM_native.png} &
-    \includegraphics[width=0.48\linewidth]{fig/eval/M2_8DRAM_flex.png} \\
-    \small (a) M2 TeraHeap (8\,G DRAM) &
-    \small (b) M2 FlexHeap (8\,G DRAM) \\
-    \includegraphics[width=0.48\linewidth]{fig/eval/iow_cpu_native_8DRAM_M2.png} &
-    \includegraphics[width=0.48\linewidth]{fig/eval/iow_cpu_flex_8DRAM_M2.png} \\
-    \small (c) iowait (TeraHeap) &
-    \small (d) iowait (FlexHeap) \\
-  \end{tabular}
-  \caption{Comparison of CPU and I/O behavior for M2 workload under 8\,G DRAM using TeraHeap (native) and FlexHeap.}
+  \begin{subfigure}[t]{0.48\linewidth}
+    \includegraphics[width=\linewidth]{fig/eval/M2_8DRAM_native.png}
+    \caption{M2 TeraHeap (8\,Gb DRAM)}
+    \label{fig:m2-th}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \includegraphics[width=\linewidth]{fig/eval/M2_8DRAM_flex.png}
+    \caption{M2 FlexHeap (8\,Gb DRAM)}
+    \label{fig:m2-fh}
+  \end{subfigure}
+
+  \vspace{1em}
+
+  \begin{subfigure}[t]{0.48\linewidth}
+    \includegraphics[width=\linewidth]{fig/eval/iow_cpu_native_8DRAM_M2.png}
+    \caption{iowait (TeraHeap)}
+    \label{fig:m2-th-iow}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \includegraphics[width=\linewidth]{fig/eval/iow_cpu_flex_8DRAM_M2.png}
+    \caption{iowait (FlexHeap)}
+    \label{fig:m2-fh-iow}
+  \end{subfigure}
+
+  \caption{Comparison of CPU and I/O behavior for M2 workload under 8\,GB DRAM using TeraHeap (native) and FlexHeap.}
   \label{fig:m2-iow-cpu}
 \end{figure}
+
+
+% \begin{figure}[htbp]
+%   \centering
+%   \begin{tabular}{cc}
+%     \includegraphics[width=0.48\linewidth]{fig/eval/M2_8DRAM_native.png} &
+%     \includegraphics[width=0.48\linewidth]{fig/eval/M2_8DRAM_flex.png} \\
+%     \small (a) M2 TeraHeap (8\,Gb DRAM) &
+%     \small (b) M2 FlexHeap (8\,Gb DRAM) \\
+%     \includegraphics[width=0.48\linewidth]{fig/eval/iow_cpu_native_8DRAM_M2.png} &
+%     \includegraphics[width=0.48\linewidth]{fig/eval/iow_cpu_flex_8DRAM_M2.png} \\
+%     \small (c) iowait (TeraHeap) &
+%     \small (d) iowait (FlexHeap) \\
+%   \end{tabular}
+%   \caption{Comparison of CPU and I/O behavior for M2 workload under 8\,Gb DRAM using TeraHeap (native) and FlexHeap.}
+%   \label{fig:m2-iow-cpu}
+% \end{figure}
 
 
 \vspace{1em}
@@ -181,11 +221,11 @@ remains low throughout, compared to the TeraHeap run.
 
 To evaluate FlexHeap, on Spark,  we run a diverse suite of workloads and compare its performance against TeraHeap. 
 Figure~\ref{fig:spark-eval} presents a normalized execution time breakdown across seven Spark benchmarks. 
-FlexHeap improves overall execution time in 4 out of 7 workloads \textit{PageRank}, \textit{ConnectedComponent},
-\textit{ShortestPaths}, and \textit{LogisticRegression} where it also reduces total garbage collection (GC) time and read traffic, 
+FlexHeap improves overall execution time in 5 out of 7 workloads \textit{PageRank}, \textit{ConnectedComponent},
+\textit{ShortestPaths}, \textit{TriangleCount} and \textit{LogisticRegression} where it also reduces total garbage collection (GC) time and read traffic, 
 on the device that contains the H2 file.
 
-In contrast, benchmarks like \textit{SVDPlusPlus}, \textit{LinearRegression}, and \textit{TriangleCount} report worse execution time compared to TeraHeap.
+In contrast, benchmarks like \textit{SVDPlusPlus} and \textit{LinearRegression} report worse execution time compared to TeraHeap.
 We analyze these cases in more detail in the following subsections to understand the underlying factors affecting FlexHeap’s effectiveness.
 
 \begin{table}[h]
@@ -200,7 +240,7 @@ We analyze these cases in more detail in the following subsections to understand
         PageRank              & 420,57  & 377,01 & -10,36 \\
         ConnectedComponent    & 526,9  & 414,61  & -21,31 \\
         ShortestPaths         & 225,9  & 219,99 & -2,62 \\
-        TriangleCount         & 28,56  & 26,81  & -6,11 \\
+        TriangleCount         & 26,57  & 25,76  & -3,06 \\
         SVDPlusPlus           & 261,56  & 349,16 & +33,49 \\
         LinearRegression      & 1584,87  & 1296,74 & -18,14 \\
         LogisticRegression    & 1618,42 & 1157,82 & -28,46 \\
@@ -215,5 +255,114 @@ demonstrating improved interaction with the OS page cache. The reductions range 
 to 28.5\% in \textit{LogisticRegression}, with an average reduction of approximately 14.5\% across these workloads.
 The only exception is \textit{SVDPlusPlus}, where read traffic increases by 33.5\%. 
 
-The only exception is \textit{SVDPlusPlus}, where FlexHeap incurs higher read traffic than TeraHeap. 
+
+\begin{figure*}[!t]
+    \centering
+
+    % --- Subfigure (a): Native heap/page-cache ---
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig/native_deb/heap_pagecache_plot.png}
+        \caption{TeraHeap: Heap and Page-Cache (TriangleCount)}
+        \label{fig:triangle_native_heap}
+    \end{subfigure}
+    \hfill
+    % --- Subfigure (b): FlexHeap heap/page-cache ---
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig/flex_deb/heap_pagecache_plot.png}
+        \caption{FlexHeap: Heap and Page-Cache (TriangleCount)}
+        \label{fig:triangle_flex_heap}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    % --- Subfigure (c): Native I/O wait ---
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig/native_deb/iow_cpu.png}
+        \caption{TeraHeap: I/O Wait (TriangleCount)}
+        \label{fig:triangle_native_iow}
+    \end{subfigure}
+    \hfill
+    % --- Subfigure (d): FlexHeap I/O wait ---
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{fig/flex_deb/iow_cpu.png}
+        \caption{FlexHeap: I/O Wait (TriangleCount)}
+        \label{fig:triangle_flex_iow}
+    \end{subfigure}
+
+    \caption{Heap/Page-cache and I/O behavior for the TriangleCount Spark benchmark under TeraHeap and FlexHeap.}
+    \label{fig:triangle_behavior}
+\end{figure*}
+
+We now provide a detailed example from the execution of the \texttt{TriangleCount} benchmark, shown in Figure~\ref{fig:triangle_behavior}. 
+In the TeraHeap (static) configuration (Figures~\ref{fig:triangle_native_heap} and~\ref{fig:triangle_native_iow}), the page cache 
+is assigned a fixed budget of 16\,Gb, indicated by the flat red line. During several periods of execution, we observe high I/O 
+wait, suggesting that the page cache becomes insufficient and suffers from frequent evictions due to
+lack of space.
+
+\begin{figure}[htbp]
+    \centering
+
+    % Subfigure (a) - Heap & Page Cache
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fig/svd_deb/heap_pagecache_plot.png}
+        \caption{Heap and page cache graph.}
+        \label{fig:svd_pagecache}
+    \end{subfigure}
+    \hfill
+    % Subfigure (b) - GC vs IO
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fig/svd_deb/avg_gc_vs_io.png}
+        \caption{GC vs IO timeline.}
+        \label{fig:svd_gc_io}
+    \end{subfigure}
+
+    % Subfigure (c) - IOW % line
+    \vskip\baselineskip
+    \begin{subfigure}[b]{0.95\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fig/svd_deb/iow_cpu.png}
+        \caption{Raw IOWait percentage over time.}
+        \label{fig:svd_iow}
+    \end{subfigure}
+
+    \caption{SVD benchmark plots.}
+    \label{fig:svd_flexheap_combined}
+\end{figure}
+
+
+
+In contrast, the FlexHeap configuration (Figures~\ref{fig:triangle_flex_heap} and~\ref{fig:triangle_flex_iow}) 
+demonstrates a more adaptive behavior. Heap shrinkages allow DRAM to be transferred to the page-cache leading to lower I/O wait. 
+We observe that the peak I/O wait in ~\ref{fig:triangle_native_iow}, is reduced from 15\% down to 2\% in ~\ref{fig:triangle_flex_iow}. Notably, the prolonged high I/O wait phases observed in the TeraHeap run are effectively 
+eliminated.
+
+
+Figure~\ref{fig:svd_flexheap_combined} presents the behavior of \texttt{SVDPlusPlus} under FlexHeap.
+We explain why it reports 10\% worse execution time and 33\% higher read traffic compared to the static configuration.
+
+Subfigure~\ref{fig:svd_pagecache} shows the resizing of the primary heap. The blue line represents the used heap, the purple line shows 
+the committed heap capacity, and the red line the page cache size. Subfigure~\ref{fig:svd_gc_io} illustrates the activity
+between GC and I/O. GC time is plotted on the left Y-axis (green line), while I/O wait time is shown on the right Y-axis (red line), 
+since the scale of I/O time is much smaller than that of GC time for easier visualization. Both share a
+common X-axis (timestamp), allowing a direct comparison of their behavior.
+Subfigure~\ref{fig:svd_iow}, shows the \%IOWait values. 
+
+
+An analysis of the execution timeline indicates that FlexHeap overestimates GC pressure.
+As shown in Subfigure~\ref{fig:svd_gc_io}, the estimated GC CPU time reaches up to 3{,}500 seconds
+per interval. This arises from a high number of mutator threads, up to 183 which inflates 
+the GC CPU time due to the current estimation method, given by \( \text{GC STW overhead} = \text{interval\_time} \times \min(\text{mutators}, \text{processors}) \).
+Consequently, the resizing policy becomes 
+biased against shrink actions, resulting in insufficient DRAM being allocated to the page cache. 
+As illustrated in Subfigure~\ref{fig:svd_pagecache}, FlexHeap performs shrink actions only during major I/O peaks. 
+However, the corresponding I/O wait subfigure~\ref{fig:svd_iow} indicates persistently high I/O wait times, due to  
+the overestimation of GC time. As a result, the heap 
+remains at a grown capacity for extended periods, limiting the available space for the page cache and leading to 
+increased traffic.
 

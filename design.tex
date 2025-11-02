@@ -130,10 +130,21 @@ each interval.
 
 \subsection{Heap resizing decision making} % rename to somethging like decision making, or dram division...
 
-Upon completion of an interval, FlexHeap collects the GC and I/O lost compute cycles and passes them through
-a \textit{finite state machine (FSM)}. The FSM serves as a control mechanism
-that reacts to both GC and I/O overhead percent changes and decides whether to adjust the DRAM allocation
-between the heap (H1) and the page-cache. The FSM consists of 3 states:
+
+
+
+% Upon completion of an interval, FlexHeap collects the GC and I/O lost compute cycles and passes them through
+% a \textit{finite state machine (FSM)}. The FSM serves as a control mechanism
+% that reacts to both GC and I/O overhead percent changes and decides whether to adjust the DRAM allocation
+% between the heap (H1) and the page-cache. The FSM consists of 3 states:
+
+Upon completion of each control interval, FlexHeap aggregates the lost compute
+cycles from GC and I/O and passes them to a finite-state machine (FSM). The FSM
+acts as a control mechanism that reacts to relative (percent) changes in GC and
+I/O overhead and decides whether to adjust the DRAM allocation between the
+main heap (H1) and the page cache for H2. The FSM consists of three states. The
+three states are shown in Fig.~\ref{fig:flexheap-fsm}, and we analyze them next.
+
 
 Firstly, the \texttt{wait\_after\_grow} state, which represents a phase that occurs after
 the system has increased the size of the heap (H1). Its purpose is to
@@ -211,6 +222,13 @@ contributing more to the increase:
 
 If the total overhead has decreased compared to the previous interval, no resizing action is needed. In this case,
 the system remains in the \texttt{no\_action} state.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.9\linewidth]{fig/fsm.png}
+  \caption{FlexHeap control FSM: states and conditions for state transitioning.}
+  \label{fig:flexheap-fsm}
+\end{figure}
 
 \subsection{Heap Resizing Step}
 
